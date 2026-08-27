@@ -1,0 +1,165 @@
+/* Registro editorial jurídico del prototipo «Inscripciones FCJYS UNIDA».
+   Spectral para títulos, Archivo para interfaz, rojo #ec3013, sin esquinas
+   redondeadas, reglas finas en lugar de cajas, fotografías en blanco y negro. */
+
+:root {
+  --fondo: #f3f2f2;
+  --papel: #fbfafa;
+  --tinta: #201e1d;
+  --rojo: #ec3013;
+  --rojo-oscuro: #ae1800;
+  --regla: rgba(32, 30, 29, 0.2);
+  --regla-fuerte: rgba(32, 30, 29, 0.4);
+  --tenue: rgba(32, 30, 29, 0.6);
+  --tenue-2: rgba(32, 30, 29, 0.75);
+  --serif: "Spectral", Georgia, serif;
+  --sans: "Archivo", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--rojo-oscuro); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { color: var(--rojo); }
+
+h1, h2, h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin: 0;
+  text-wrap: pretty;
+}
+p { margin: 0 0 12px; }
+img { display: block; max-width: 100%; }
+
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--rojo); outline-offset: 2px; }
+::selection { background: rgba(236, 48, 19, 0.3); }
+
+input[type="checkbox"], input[type="radio"] { accent-color: var(--rojo); width: 17px; height: 17px; }
+
+/* ── Retícula ───────────────────────────────────────────────────────────── */
+.fc-grid { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.fc-2 { display: grid; gap: 40px; grid-template-columns: 1.55fr 1fr; align-items: start; }
+@media (max-width: 900px) { .fc-2 { grid-template-columns: 1fr; gap: 28px; } }
+.fc-scroll { overflow-x: auto; }
+.fc-tabs { display: flex; flex-wrap: wrap; gap: 22px; }
+
+.eyebrow { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--rojo-oscuro); }
+.rule { border: 0; border-top: 1px solid var(--regla); margin: 0; }
+.rule-strong { border: 0; border-top: 2px solid var(--regla-fuerte); margin: 0; }
+.tenue { color: var(--tenue); }
+.numeral { font-variant-numeric: tabular-nums; }
+.grayscale { filter: grayscale(1) contrast(1.05); }
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; text-decoration: none;
+  font-family: var(--sans); font-weight: 600; font-size: 14px; line-height: 1.2;
+  color: var(--tinta); background: transparent;
+  border: 1px solid transparent; border-radius: 0;
+  padding: 8px 14px;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--rojo); color: var(--fondo); }
+.btn-primary:hover:not(:disabled) { background: #dd2b0f; }
+.btn-primary:active:not(:disabled) { background: var(--rojo-oscuro); }
+.btn-secondary { border-color: var(--regla-fuerte); }
+.btn-secondary:hover:not(:disabled) { background: rgba(32, 30, 29, 0.07); }
+.btn-ghost { color: var(--rojo-oscuro); padding-inline: 4px; text-decoration: underline; text-underline-offset: 3px; }
+.btn-ghost:hover:not(:disabled) { color: var(--rojo); }
+.btn-block { width: 100%; }
+
+/* ── Formularios ────────────────────────────────────────────────────────── */
+.field { display: block; }
+.field > label { display: block; font-size: 12px; margin-bottom: 5px; color: rgba(32, 30, 29, 0.7); }
+.input {
+  width: 100%; min-height: 36px; padding: 6px 10px;
+  font: inherit; font-size: 14px; color: var(--tinta);
+  caret-color: var(--rojo); background: #eae9e9;
+  border: 1px solid var(--regla-fuerte); border-radius: 0;
+}
+.input:hover { border-color: rgba(32, 30, 29, 0.55); }
+.input:focus-visible { border-color: var(--rojo); outline-offset: 0; }
+textarea.input { min-height: 90px; resize: vertical; }
+.input-linea {
+  background: transparent; border: 0; border-bottom: 1px solid rgba(32, 30, 29, 0.35);
+  padding-left: 0; border-radius: 0;
+}
+.input-linea:focus-visible { border-bottom-color: var(--rojo); }
+.ayuda { font-size: 13px; color: var(--tenue); display: block; margin-top: 4px; }
+.error { font-size: 14px; color: var(--rojo-oscuro); }
+
+/* ── Tablas ─────────────────────────────────────────────────────────────── */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+  text-align: left; font-family: var(--sans); font-weight: 600; font-size: 13px;
+  color: var(--tenue); padding: 8px; border-bottom: 2px solid var(--regla-fuerte);
+  white-space: nowrap;
+}
+.table td { padding: 8px; border-bottom: 1px solid var(--regla); vertical-align: top; }
+.table tbody tr:hover { background: rgba(32, 30, 29, 0.04); }
+.table .obra { font-family: var(--serif); font-size: 16px; }
+
+/* ── Aviso legal desplegable, con degradado al pie ──────────────────────── */
+.plegado { position: relative; }
+.plegado[data-abierto="false"] .plegado-cuerpo {
+  max-height: 128px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+.plegado-cuerpo { transition: max-height 0.2s ease; }
+.plegado-mando {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--rojo-oscuro); text-decoration: underline; text-underline-offset: 3px;
+}
+.plegado-mando:hover { color: var(--rojo); }
+.plegado-mando .flecha { transition: transform 0.2s ease; font-size: 11px; }
+.plegado[data-abierto="true"] .plegado-mando .flecha { transform: rotate(180deg); }
+
+/* ── Escalas de la encuesta ─────────────────────────────────────────────── */
+.escala { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.escala button {
+  min-width: 46px; min-height: 46px; padding: 0 8px; cursor: pointer;
+  border: 1px solid rgba(32, 30, 29, 0.3); background: transparent;
+  color: var(--tinta); font-family: var(--serif); font-size: 18px; border-radius: 0;
+}
+.escala button[aria-pressed="true"] { border-color: var(--rojo); background: var(--rojo); color: var(--fondo); }
+.escala button:hover:not([aria-pressed="true"]) { border-color: var(--rojo); }
+.escala-nps button { min-width: 38px; font-size: 16px; }
+.escala-rotulos { display: flex; justify-content: space-between; font-size: 12px; color: var(--tenue); margin-top: 6px; }
+
+/* ── Barra de progreso de indicadores ───────────────────────────────────── */
+.barra { height: 6px; background: rgba(32, 30, 29, 0.12); margin-top: 8px; }
+.barra > span { display: block; height: 100%; background: var(--rojo); }
+
+/* ── Cabecera y pie ─────────────────────────────────────────────────────── */
+.cinta { background: var(--papel); border-bottom: 1px solid var(--regla); }
+.limite { max-width: 1200px; margin: 0 auto; padding-inline: 28px; }
+.nav-tab {
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--sans); font-size: 14px; padding: 6px 0 10px;
+  margin-bottom: -1px; border-bottom: 2px solid transparent;
+  color: var(--tenue); text-decoration: none;
+}
+.nav-tab:hover { color: var(--tinta); }
+.nav-tab[aria-current="page"] { color: var(--tinta); font-weight: 600; border-bottom-color: var(--rojo); }
+
+.tarjeta { background: var(--papel); border: 1px solid rgba(32, 30, 29, 0.18); }
+
+@media print {
+  .cinta, .btn, .nav-tab { display: none !important; }
+  body { background: #fff; }
+}
