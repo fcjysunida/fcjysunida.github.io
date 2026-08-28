@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { certificadoPorCodigo } from '../data/publico'
 import type { CertificadoPublico } from '../lib/tipos'
 import { fechaHora } from '../lib/formato'
+import { etiquetaModalidad } from '../lib/campos'
 import { CORREO, FACULTAD } from '../lib/institucion'
 import { Cargando, Aviso } from '../ui/piezas'
 import Marco from './Marco'
@@ -19,6 +20,11 @@ export function aplicarEtiquetas(plantilla: string, valores: Record<string, stri
       return v.replace(/[&<>"]/g, (c) =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c))
     })
+}
+
+const ROLES_EN_CONSTANCIA: Record<string, string> = {
+  participante: 'participante', disertante: 'disertante', organizador: 'organizador',
+  tutor: 'tutor', panelista: 'panelista', moderador: 'moderador',
 }
 
 /** «María Fernanda Ayala» → nombres «María Fernanda», apellido «Ayala». */
@@ -82,7 +88,10 @@ export default function Certificado() {
   const valores: Record<string, string> = {
     nombres, apellido, nombrecompleto: c.nombre,
     evento: c.evento, fecha: c.fecha, horas: String(c.horas),
-    rol: c.rol, modalidad: c.modalidad, lugar: c.lugar ?? '',
+    // Los valores crudos del esquema («hibrida») no van en un documento oficial.
+    rol: ROLES_EN_CONSTANCIA[c.rol] ?? c.rol,
+    modalidad: etiquetaModalidad(c.modalidad as Parameters<typeof etiquetaModalidad>[0]),
+    lugar: c.lugar ?? '',
     codigo: c.codigo, jornadas: String(c.jornadas),
     fechaemision: new Date(c.emitido_en).toLocaleDateString('es-PY', { timeZone: 'America/Asuncion' }),
   }

@@ -148,7 +148,13 @@ export async function desplegar(o: Opciones): Promise<void> {
   execFileSync('git',
     ['push', `https://x-access-token:${token}@github.com/${o.repo}.git`, 'main:main', '--force'],
     { stdio: 'inherit', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } })
-  git(['branch', '--set-upstream-to=origin/main', 'main'])
+  // El push fue contra la URL con el token, así que `origin/main` todavía no
+  // existe localmente. Se trae la referencia para dejar el upstream fijado.
+  // Es cosmético: si falla, el despliegue igual está hecho.
+  try {
+    git(['fetch', 'origin', 'main'])
+    git(['branch', '--set-upstream-to=origin/main', 'main'])
+  } catch { console.log('  (no pude fijar el upstream; el código ya está subido)') }
   console.log('  Código subido ✓')
 
   // 3. Secretos y variables del build
