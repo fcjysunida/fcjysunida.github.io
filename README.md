@@ -82,6 +82,11 @@ npm run cli -- usuarios:alta --email extensionderecho@unida.edu.py \
 
 Roles: `admin`, `coordinacion`, `docente`, `secretaria`, `auditor`.
 
+> Existe además una **cuenta de servicio** `sistema.padron@unida.edu.py` con rol
+> `secretaria`, creada para la carga inicial del padrón. Su contraseña está solo en
+> `.env` (que no se versiona). Puede rotarla, desactivarla desde el panel o dejarla
+> para las importaciones periódicas.
+
 ### 3. Frontend
 
 ```bash

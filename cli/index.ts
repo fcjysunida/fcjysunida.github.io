@@ -314,7 +314,9 @@ async function main(): Promise<void> {
                   (encabezados.length > 12 ? ` … (+${encabezados.length - 12})` : ''))
       const conMat = filas.filter((f) => f.matricula).length
       const carreras = [...new Set(filas.map((f) => f.carrera).filter(Boolean))]
+      const tipos = [...new Set(filas.map((f) => f.tipo_documento).filter(Boolean))]
       console.log(`  Con matrícula: ${conMat}. Carreras: ${carreras.join(', ') || '—'}`)
+      console.log(`  Documentos: ${tipos.join(', ') || 'sin especificar'}`)
       if (filas[0]) {
         // Muestra enmascarada: la cédula completa no se imprime nunca.
         console.log(`  Primera fila: ${filas[0].nombre} · cédula ` +
@@ -330,7 +332,7 @@ async function main(): Promise<void> {
       const db = await comoOperador()
       // En lotes: una planilla de varios miles de filas no entra en una sola llamada.
       const LOTE = 400
-      let procesadas = 0, omitidas = 0, total = 0
+      let procesadas = 0, omitidas = 0, total = 0, extranjeros = 0
       for (let i = 0; i < filas.length; i += LOTE) {
         const { data, error } = await db.rpc('padron_importar', {
           p_periodo: periodo, p_condicion: condicion, p_filas: filas.slice(i, i + LOTE),
@@ -339,11 +341,17 @@ async function main(): Promise<void> {
         const r = data as Record<string, number>
         procesadas += Number(r.procesadas ?? 0)
         omitidas += Number(r.omitidas ?? 0)
+        extranjeros += Number(r.documentos_no_paraguayos ?? 0)
         total = Number(r.total_periodo ?? 0)
         process.stdout.write(`\r  Cargando… ${procesadas}/${filas.length}`)
       }
       console.log(`\n\n  ${procesadas} registros cargados en ${periodo} como ${condicion}.`)
-      if (omitidas > 0) console.log(`  ${omitidas} omitidos por falta de cédula o nombre.`)
+      if (extranjeros > 0) {
+        console.log(`  ${extranjeros} con documento no paraguayo: se importan igual.`)
+      }
+      if (omitidas > 0) {
+        console.log(`  ${omitidas} omitidos por falta de documento o de nombre.`)
+      }
       console.log(`  El período tiene ahora ${total} registros.`)
 
       const { data: cruce } = await db.rpc('recruzar_padron', { p_actividad: null })

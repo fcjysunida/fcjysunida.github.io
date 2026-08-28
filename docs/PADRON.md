@@ -24,6 +24,25 @@ eligió, sin tocar) y `condicion` (la efectiva), más `condicion_origen`, que
 explica en una frase por qué es la que es. El panel muestra un ✓ junto a las
 verificadas y, debajo, lo que la persona había declarado cuando difiere.
 
+## Alumnado extranjero
+
+No todo el mundo tiene cédula paraguaya: en las planillas aparecen documentos
+como el «R.G» brasileño, pasaportes y DNI. **No se filtran.** Dejarlos fuera del
+padrón los contaría como «externos» en el informe, que es exactamente lo
+contrario de lo correcto.
+
+El cruce no necesita que el documento sea una cédula, necesita un identificador
+estable. El HMAC funciona igual con letras. Lo único importante es normalizar
+igual de los dos lados: se quita todo lo que no sea alfanumérico y se pasa a
+mayúsculas, de modo que `ab-123456` y `AB123456` sean la misma persona. Para las
+cédulas numéricas eso no cambia nada.
+
+El tipo de documento se guarda en `padron.tipo_documento` y el resumen del panel
+muestra cuántos registros tienen documento no paraguayo. En el formulario
+público, el campo dice «Cédula de identidad o documento equivalente» y aclara que
+quien sea extranjero debe usar el documento con el que figura en la Universidad
+—es lo que hace que el hash coincida—.
+
 ## Por qué el cruce no descifra nada
 
 El padrón guarda `cedula_hash`, el mismo HMAC que usa el registro de asistencia.
@@ -44,7 +63,7 @@ El sistema académico exporta un `.XLS` que en realidad es BIFF2 (Excel 2.1), co
 | --- | --- |
 | `persona_ape_paterno` + `persona_ape_materno` + `persona_nombre` | `nombre` |
 | `p_ndoc_identidad` | cédula (se cifra y se convierte en HMAC) |
-| `p_gdoc_identidad` | filtro: solo se importan cédulas de identidad |
+| `p_gdoc_identidad` | `tipo_documento` (no filtra: ver abajo) |
 | `cingreso` | `matricula` |
 | `scarrera` | `carrera` |
 | `periodo_sigla` | control del período |
@@ -53,6 +72,13 @@ No se usa `dpersona` porque viene truncado. Si la planilla tiene otro formato, e
 importador detecta los encabezados por palabra clave (`nombre`, `cédula`,
 `matrícula`, `carrera`, `ciclo`/`semestre`/`curso`) y, si aun así falla, se le
 indican las columnas a mano con `--col-nombre N --col-cedula N`.
+
+## Estado actual
+
+El período **2025-1** está cargado con 162 estudiantes: 137 de Derecho y 25 de
+Ciencias Políticas, de los cuales 161 con cédula y 1 con R.G. Todos con matrícula.
+Las fechas del período están puestas de manera provisional (1 de enero a 31 de
+julio de 2025) y se ajustan desde `/admin/padron`.
 
 ## Uso
 

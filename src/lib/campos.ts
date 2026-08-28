@@ -60,9 +60,9 @@ export function camposHabituales(): Campo[] {
   return [
     { id: nuevoId(), tipo: 'texto', etiqueta: 'Nombre y apellido', obligatorio: true,
       ayuda: 'Tal como debe figurar en el certificado', mapa: 'nombre' },
-    { id: nuevoId(), tipo: 'cedula', etiqueta: 'Cédula de identidad', obligatorio: true,
-      cifrado: true, mapa: 'cedula',
-      ayuda: 'Se utiliza para validar su asistencia. Se almacena cifrada.' },
+    { id: nuevoId(), tipo: 'cedula', etiqueta: 'Cédula de identidad o documento equivalente',
+      obligatorio: true, cifrado: true, mapa: 'cedula',
+      ayuda: 'Si es extranjero, el documento con el que figura en la Universidad. Se utiliza para validar su asistencia y se almacena cifrado.' },
     { id: nuevoId(), tipo: 'email', etiqueta: 'Correo electrónico', obligatorio: true,
       ayuda: 'Allí se envían la confirmación y el certificado', mapa: 'email' },
     { id: nuevoId(), tipo: 'tel', etiqueta: 'Teléfono o WhatsApp', cifrado: true, mapa: 'telefono' },

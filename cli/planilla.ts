@@ -30,7 +30,9 @@ function convertirAXlsx(ruta: string): string {
 
 export interface FilaPadron {
   nombre: string
+  /** Número de documento: cédula paraguaya o documento extranjero. */
   cedula: string
+  tipo_documento?: string
   matricula?: string
   carrera?: string
   ciclo?: string
@@ -68,13 +70,10 @@ function mapeoAcademico(cab: string[]): Record<string, number> | null {
 
 function armarAcademico(m: Record<string, number>, filas: string[][]): FilaPadron[] {
   const en = (f: string[], k: number) => (k >= 0 ? (f[k] ?? '').toString().trim() : '')
+  // No se filtra por tipo de documento: parte del alumnado es extranjero y no
+  // tiene cédula paraguaya. Dejarlos fuera del padrón los contaría como
+  // «externos» en el informe, que es exactamente lo contrario de lo correcto.
   return filas
-    .filter((f) => {
-      const doc = en(f, m.tipoDoc ?? -1).toUpperCase()
-      // Se toman solo cédulas de identidad: pasaportes y demás no sirven para
-      // cruzar con el formulario, que pide cédula.
-      return doc === '' || doc.includes('CEDULA') || doc.includes('CÉDULA')
-    })
     .map((f) => {
       const apellidos = [en(f, m.apePaterno ?? -1), en(f, m.apeMaterno ?? -1)]
         .filter(Boolean).join(' ')
@@ -82,6 +81,7 @@ function armarAcademico(m: Record<string, number>, filas: string[][]): FilaPadro
       return {
         nombre: [apellidos, nombres].filter(Boolean).join(', '),
         cedula: en(f, m.cedula ?? -1).replace(/\.0$/, ''),
+        tipo_documento: en(f, m.tipoDoc ?? -1) || undefined,
         matricula: en(f, m.matricula ?? -1).replace(/\.0$/, '') || undefined,
         carrera: en(f, m.carrera ?? -1) || undefined,
         ciclo: undefined,
@@ -97,6 +97,7 @@ function armar(cab: string[], filas: string[][], forzado: Record<string, number>
     matricula: forzado.matricula ?? indice(cab, 'matricula', 'matr'),
     carrera: forzado.carrera ?? indice(cab, 'carrera'),
     ciclo: forzado.ciclo ?? indice(cab, 'ciclo', 'semestre', 'curso'),
+    tipoDoc: forzado.tipoDoc ?? indice(cab, 'tipo de doc', 'tipo_doc', 'gdoc'),
   }
   if (i.nombre < 0 || i.cedula < 0) {
     throw new Error(
@@ -110,6 +111,7 @@ function armar(cab: string[], filas: string[][], forzado: Record<string, number>
     .map((f) => ({
       nombre: en(f, i.nombre),
       cedula: en(f, i.cedula),
+      tipo_documento: en(f, i.tipoDoc) || undefined,
       matricula: en(f, i.matricula) || undefined,
       carrera: en(f, i.carrera) || undefined,
       ciclo: en(f, i.ciclo) || undefined,
