@@ -9,6 +9,11 @@ export const RETENCION_MESES = 24
 export const AUTORIDAD = 'Agencia Nacional de Protección de Datos Personales'
 export const LEY = 'Ley N° 7593/2025'
 
-/** Base de los enlaces que se reparten (formulario y asistencia). */
-export const basePublica = () =>
-  typeof window === 'undefined' ? `https://${DOMINIO_PUBLICO}` : window.location.origin
+/** Base de los enlaces que se reparten (formulario, asistencia y constancias).
+ *  Incluye el subdirectorio del build: en GitHub Pages sobre un repositorio
+ *  corriente el sitio cuelga de /fcjysunida/, no de la raíz. */
+export const basePublica = () => {
+  if (typeof window === 'undefined') return `https://${DOMINIO_PUBLICO}`
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  return window.location.origin + base
+}

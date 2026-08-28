@@ -97,10 +97,13 @@ npm run dev
 
 ### 4. Publicación
 
-En el repositorio de GitHub, cargue los *secrets* `VITE_SUPABASE_URL` y
-`VITE_SUPABASE_ANON_KEY`, y la *variable* `BASE_PUBLICA` (`/` para
-`fcjysunida.github.io`, `/fcjysunida/` para un repositorio corriente). Cada push a `main`
-publica. Ver `docs/DESPLIEGUE.md`.
+```bash
+npm run cli -- desplegar:github --repo leoberniga/fcjysunida
+```
+
+Crea el repositorio, sube el código, carga los secretos de Supabase, fija `BASE_PUBLICA`,
+activa Pages y dispara el despliegue. Necesita `GITHUB_TOKEN` en `.env`; el comando explica
+cómo obtenerlo. Ver `docs/DESPLIEGUE.md`.
 
 ## Rutas
 

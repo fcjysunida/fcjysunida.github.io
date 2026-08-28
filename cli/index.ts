@@ -12,6 +12,7 @@ import { informeMarkdown, informeDocx } from './informe'
 import type { DatosInforme } from './informe'
 import { leerPlanilla } from './planilla'
 import { propuestaDocx, informeDocx as proyectoInformeDocx } from './proyecto-docx'
+import { desplegar } from './desplegar'
 
 const [, , comando = '', ...resto] = process.argv
 const args = argumentos(resto)
@@ -65,6 +66,11 @@ const AYUDA = `
 
   Retención
     retencion:aplicar [--meses 24] [--dry-run]
+
+  Publicación
+    desplegar:github [--repo leoberniga/fcjysunida] [--privado] [--base /fcjysunida/]
+                     # crea el repositorio, sube el código, carga los secretos,
+                     # activa Pages y dispara el despliegue. Necesita GITHUB_TOKEN en .env
 
   Puesta en marcha (usan SUPABASE_SERVICE_ROLE_KEY)
     claves:inicializar
@@ -463,6 +469,25 @@ async function main(): Promise<void> {
       const { data, error } = await db.rpc('correos_estado')
       if (error) fatal(error.message)
       tabla([data as Record<string, unknown>])
+      break
+    }
+
+    // ── Publicación ──────────────────────────────────────────────────────────
+    case 'desplegar:github': {
+      const repo = (args.repo as string) ?? 'leoberniga/fcjysunida'
+      const [duenio, nombre] = repo.split('/')
+      // Un repositorio llamado «usuario.github.io» se sirve en la raíz;
+      // cualquier otro cuelga de /nombre/.
+      const base = (args.base as string) ??
+        (duenio && nombre && nombre.toLowerCase() === `${duenio.toLowerCase()}.github.io`
+          ? '/' : `/${nombre}/`)
+      const url = process.env.VITE_SUPABASE_URL
+      const anon = process.env.VITE_SUPABASE_ANON_KEY
+      if (!url || !anon) fatal('Faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env')
+      await desplegar({
+        repo, privado: args.privado === true, base,
+        supabaseUrl: url, supabaseAnon: anon,
+      })
       break
     }
 

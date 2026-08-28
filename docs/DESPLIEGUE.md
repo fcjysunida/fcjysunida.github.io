@@ -46,7 +46,36 @@ SUPABASE_SERVICE_ROLE_KEY=...     # solo para claves:inicializar y usuarios:alta
 En GitHub, cargar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` como *secrets*, y
 `BASE_PUBLICA` como *variable* del repositorio.
 
-## 4. GitHub Actions
+## 4. Publicación en GitHub Pages
+
+En un solo comando:
+
+```bash
+npm run cli -- desplegar:github --repo leoberniga/fcjysunida
+```
+
+Crea el repositorio si no existe, sube el código, carga `VITE_SUPABASE_URL` y
+`VITE_SUPABASE_ANON_KEY` como *secrets* cifrados, fija la variable `BASE_PUBLICA`, activa
+Pages servido por Actions y dispara el despliegue.
+
+Necesita `GITHUB_TOKEN` en `.env` —un *fine-grained token* con permiso de escritura sobre
+Administration, Contents, Secrets, Variables y Workflows del repositorio—. El comando lo
+explica si falta. El token se lee del archivo: no se imprime ni queda en `.git/config`.
+
+### Dónde queda el sitio
+
+| Repositorio | URL | `BASE_PUBLICA` |
+| --- | --- | --- |
+| `fcjysunida/fcjysunida.github.io` | `https://fcjysunida.github.io` | `/` |
+| `leoberniga/fcjysunida` | `https://leoberniga.github.io/fcjysunida` | `/fcjysunida/` |
+
+El comando deduce la base sola. El router usa `import.meta.env.BASE_URL` como `basename`, y
+los enlaces que se reparten (`/f/`, `/a/`, `/c/`) incluyen el subdirectorio, de modo que el
+mismo código sirve en los dos casos.
+
+El repositorio debe ser **público** para que Pages funcione en el plan gratuito. No hay
+ningún secreto en el código: la clave anónima es pública por diseño y todo el control está
+en las políticas RLS y en los permisos de las funciones.
 
 El workflow está en `.github/workflows/deploy.yml`. Cada push a `main` compila y publica.
 El build copia `index.html` a `404.html` para que las rutas del cliente resuelvan.

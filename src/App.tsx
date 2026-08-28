@@ -36,8 +36,10 @@ function Protegido({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  // `basename` toma la base del build: sirve tanto en la raíz de un dominio
+  // propio como bajo /fcjysunida/ en un repositorio corriente.
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ProveedorSesion>
         <Routes>
           {/* Rutas públicas, sin cuenta */}
