@@ -350,3 +350,65 @@ export async function redactarInforme(proyectoId: string): Promise<BorradorInfor
   }
   return cuerpo.borrador as BorradorInforme
 }
+
+// ── Participantes de proyecto ────────────────────────────────────────────────
+export interface ResultadoPadron {
+  nombre: string
+  matricula: string | null
+  carrera: string | null
+  ciclo: string | null
+  periodo: string
+  condicion: 'estudiante' | 'egresado'
+  cedula_mascara: string | null
+  cedula_hash: string
+}
+
+export interface Desglose {
+  total: number
+  asistieron: number
+  estudiantes: number
+  egresados: number
+  docentes: number
+  externos: number
+  verificados: number
+  sin_verificar: number
+  por_carrera: Record<string, number>
+  por_fuente: Record<string, number>
+}
+
+export interface FilaParticipante {
+  nombre: string
+  cedula?: string
+  cedula_hash?: string
+  matricula?: string
+  organizacion?: string
+  tipo?: string
+  asistio?: boolean
+}
+
+export const buscarPadron = (texto: string) =>
+  rpc<ResultadoPadron[]>('padron_buscar', { p_texto: texto, p_limite: 25 })
+
+export const participantesDesdeActividad = (proyectoId: string, soloAsistentes: boolean) =>
+  rpc<{ ok: boolean; agregados: number; ya_estaban: number }>(
+    'proyecto_participantes_desde_actividad',
+    { p_proyecto: proyectoId, p_solo_asistentes: soloAsistentes })
+
+export const agregarParticipantes = (
+  proyectoId: string, filas: FilaParticipante[], fuente: string,
+) =>
+  rpc<{ ok: boolean; agregados: number; ya_estaban: number; omitidos: number }>(
+    'proyecto_participantes_agregar',
+    { p_proyecto: proyectoId, p_filas: filas, p_fuente: fuente })
+
+export const verificarParticipantes = (proyectoId?: string) =>
+  rpc<{ ok: boolean; revisados: number; reclasificados: number }>(
+    'proyecto_participantes_verificar', { p_proyecto: proyectoId ?? null })
+
+export const desgloseDe = (proyectoId: string) =>
+  rpc<Desglose>('proyecto_desglose', { p_proyecto: proyectoId })
+
+export async function quitarParticipante(id: string): Promise<void> {
+  const { error } = await supabase.from('proyecto_participantes').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}

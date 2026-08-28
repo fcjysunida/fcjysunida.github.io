@@ -19,6 +19,18 @@ const CAMPOS: { clave: string; label: string; ayuda: string }[] = [
     ayuda: 'Base de los enlaces que se reparten en los correos y las constancias.' },
 ]
 
+const PROVEEDORES: { id: string; label: string; secreto: string; modelo: string; nota: string }[] = [
+  { id: 'google', label: 'Google — Gemini', secreto: 'GEMINI_API_KEY', modelo: 'gemini-3-pro',
+    nota: 'Se factura con el saldo de Google AI Studio o de Google Cloud.' },
+  { id: 'anthropic', label: 'Anthropic — Claude', secreto: 'ANTHROPIC_API_KEY',
+    modelo: 'claude-opus-5',
+    nota: 'Créditos de la consola de Anthropic. Se factura aparte del plan Max o Pro: la suscripción cubre claude.ai y Claude Code, no la API.' },
+  { id: 'openai', label: 'OpenAI — GPT', secreto: 'OPENAI_API_KEY', modelo: 'gpt-5',
+    nota: 'Créditos de la plataforma de OpenAI.' },
+  { id: 'xai', label: 'xAI — Grok', secreto: 'XAI_API_KEY', modelo: 'grok-4',
+    nota: 'Créditos de la consola de xAI. Usa la misma interfaz que OpenAI.' },
+]
+
 export default function Ajustes() {
   const permisos = usePermisos()
   const [cfg, setCfg] = useState<Record<string, string> | null>(null)
@@ -100,6 +112,9 @@ export default function Ajustes() {
       ))}
 
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
+      <SeccionIA cfg={cfg} editable={permisos.configura} alGuardar={guardar} />
+
+      <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
       <h2 style={{ fontSize: 25 }}>Puesta en marcha del correo</h2>
       <ol style={{ paddingLeft: 20, fontSize: 14, lineHeight: 1.7, color: 'var(--tenue-2)',
                    maxWidth: '76ch' }}>
@@ -169,5 +184,89 @@ function CampoConfig({
       </div>
       <span className="ayuda">{campo.ayuda}</span>
     </div>
+  )
+}
+
+/** Elección del proveedor de la redacción asistida. */
+function SeccionIA({
+  cfg, editable, alGuardar,
+}: {
+  cfg: Record<string, string>
+  editable: boolean
+  alGuardar: (clave: string, valor: string) => Promise<void>
+}) {
+  const proveedor = cfg.ia_proveedor ?? 'google'
+  const activa = cfg.ia_activa !== 'false'
+  const elegido = PROVEEDORES.find((p) => p.id === proveedor) ?? PROVEEDORES[0]!
+  const [modelo, setModelo] = useState(cfg.ia_modelo ?? elegido.modelo)
+  useEffect(() => setModelo(cfg.ia_modelo ?? elegido.modelo), [cfg.ia_modelo, elegido.modelo])
+
+  return (
+    <>
+      <h2 style={{ fontSize: 25 }}>Redacción asistida de informes</h2>
+      <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '10px 0 0' }}>
+        El botón «Redactar un borrador» del editor de informes arma un texto con la estructura
+        del formato oficial a partir de lo cargado del proyecto y de las cifras reales de
+        participación. Elija con qué servicio: los cuatro reciben el mismo pedido y devuelven
+        lo mismo, y cada uno se factura por su cuenta.
+      </p>
+
+      <div style={{ display: 'grid', gap: 16, marginTop: 20,
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
+        {PROVEEDORES.map((p) => {
+          const puesto = p.id === proveedor
+          return (
+            <button key={p.id} type="button" disabled={!editable}
+                    onClick={() => void alGuardar('ia_proveedor', p.id)
+                      .then(() => alGuardar('ia_modelo', p.modelo))}
+                    style={{ textAlign: 'left', cursor: editable ? 'pointer' : 'default',
+                             background: puesto ? 'var(--papel)' : 'transparent',
+                             border: `1px solid ${puesto ? 'var(--rojo)' : 'var(--regla)'}`,
+                             borderTopWidth: puesto ? 3 : 1, padding: '14px 16px' }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>
+                {p.label}{puesto && <span style={{ color: 'var(--rojo)', fontSize: 13 }}> · en uso</span>}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--tenue-2)', marginTop: 6 }}>{p.nota}</div>
+              <div className="ayuda" style={{ marginTop: 8 }}>
+                Clave: <code>{p.secreto}</code>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end',
+                    marginTop: 22 }}>
+        <div className="field" style={{ minWidth: 240 }}>
+          <label htmlFor="ia-modelo">Identificador del modelo</label>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <input id="ia-modelo" className="input" style={{ maxWidth: 240 }} value={modelo}
+                   disabled={!editable} onChange={(e) => setModelo(e.target.value)} />
+            {editable && modelo !== (cfg.ia_modelo ?? '') && (
+              <button className="btn btn-secondary"
+                      onClick={() => void alGuardar('ia_modelo', modelo)}>Guardar</button>
+            )}
+          </div>
+          <span className="ayuda">
+            Sugerido para {elegido.label}: <code>{elegido.modelo}</code>. Los proveedores
+            renuevan y retiran modelos: si deja de funcionar, verifique el identificador
+            vigente en su documentación.
+          </span>
+        </div>
+        {editable && (
+          <button className={activa ? 'btn btn-secondary' : 'btn btn-primary'}
+                  onClick={() => void alGuardar('ia_activa', activa ? 'false' : 'true')}>
+            {activa ? 'Desactivar la redacción asistida' : 'Activar la redacción asistida'}
+          </button>
+        )}
+      </div>
+
+      <p style={{ fontSize: 13, color: 'var(--tenue)', marginTop: 16, maxWidth: '76ch' }}>
+        La clave nunca se guarda en la base ni viaja al navegador: va en los secretos de la
+        función de servidor. Cárguela con{' '}
+        <code>supabase secrets set {elegido.secreto}=…</code>. Cada borrador generado queda
+        registrado con proveedor, modelo y tokens consumidos, para poder controlar el gasto.
+      </p>
+    </>
   )
 }

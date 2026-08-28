@@ -348,6 +348,13 @@ export interface ParticipanteProyecto {
   catedra: string | null
   organizacion: string | null
   orden: number
+  /** Condición verificada contra el padrón del período del proyecto. */
+  condicion: Condicion | null
+  condicion_origen: string | null
+  periodo_verificado: string | null
+  asistio: boolean
+  jornadas: number
+  fuente: string
 }
 
 export interface InformeProyecto {

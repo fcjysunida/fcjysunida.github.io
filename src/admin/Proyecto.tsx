@@ -1,17 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
-  traerProyecto, guardarProyecto, participantesDe, guardarParticipantes,
+  traerProyecto, guardarProyecto, participantesDe,
   informesDe, guardarInforme, horasSugeridas, listarPeriodos, listarActividades,
-  redactarInforme,
+  redactarInforme, participantesDesdeActividad, agregarParticipantes,
+  verificarParticipantes, desgloseDe, buscarPadron, quitarParticipante,
 } from '../data/panel'
+import type { Desglose, ResultadoPadron, FilaParticipante } from '../data/panel'
 import type {
   Proyecto as TProyecto, Propuesta, ParticipanteProyecto, InformeProyecto,
-  PeriodoAcademico, Actividad, ClasificacionProyecto, EstadoProyecto, TipoParticipante,
+  PeriodoAcademico, Actividad, ClasificacionProyecto, EstadoProyecto,
 } from '../lib/tipos'
 import {
-  CLASIFICACIONES, ESTADOS_PROYECTO, TIPOS_PARTICIPANTE,
-  RUBROS, FUENTES, CREDITOS, DESTINATARIOS, etiquetaTipoParticipante,
+  CLASIFICACIONES, ESTADOS_PROYECTO, RUBROS, FUENTES, CREDITOS, DESTINATARIOS,
 } from '../lib/proyecto'
 import { fechaCorta, hoyAsuncion } from '../lib/formato'
 import { Cargando, Aviso } from '../ui/piezas'
@@ -257,7 +258,7 @@ export default function Proyecto() {
         </div>
       )}
 
-      {pest === 'participantes' && <Participantes proyectoId={id} />}
+      {pest === 'participantes' && <Participantes proyecto={p} />}
       {pest === 'informes' && <Informes proyecto={p} />}
     </div>
   )
@@ -302,113 +303,289 @@ function HorasEU({
   )
 }
 
-function Participantes({ proyectoId }: { proyectoId: string }) {
+function Participantes({ proyecto }: { proyecto: TProyecto }) {
   const [filas, setFilas] = useState<ParticipanteProyecto[] | null>(null)
+  const [desglose, setDesglose] = useState<Desglose | null>(null)
   const [aviso, setAviso] = useState('')
-  const [sucio, setSucio] = useState(false)
+  const [error, setError] = useState('')
+  const [trabajando, setTrabajando] = useState(false)
 
-  useEffect(() => {
-    participantesDe(proyectoId).then(setFilas).catch(() => setFilas([]))
-  }, [proyectoId])
+  const cargar = () => {
+    participantesDe(proyecto.id).then(setFilas).catch((e: Error) => setError(e.message))
+    desgloseDe(proyecto.id).then(setDesglose).catch(() => setDesglose(null))
+  }
+  useEffect(cargar, [proyecto.id])
+
+  async function accion(fn: () => Promise<string>) {
+    setError(''); setAviso(''); setTrabajando(true)
+    try { setAviso(await fn()); cargar() }
+    catch (e) { setError((e as Error).message) } finally { setTrabajando(false) }
+  }
 
   if (!filas) return <Cargando />
 
-  const set = (i: number, parche: Partial<ParticipanteProyecto>) => {
-    setFilas(filas.map((f, j) => (j === i ? { ...f, ...parche } : f))); setSucio(true)
-  }
+  const periodoTexto = proyecto.fecha_inicio
+    ? `la fecha del proyecto (${fechaCorta(proyecto.fecha_inicio)})`
+    : proyecto.anio ? `el año ${proyecto.anio}` : 'el período del proyecto'
 
-  async function guardar() {
-    try {
-      await guardarParticipantes(proyectoId, (filas ?? []).map((f, i) => ({
-        proyecto_id: proyectoId, tipo: f.tipo, nombre: f.nombre,
-        matricula: f.matricula, carrera: f.carrera, ciclo: f.ciclo,
-        catedra: f.catedra, organizacion: f.organizacion, orden: i,
-      })))
-      setSucio(false); setAviso('Participantes guardados.')
-    } catch (e) { setAviso((e as Error).message) }
+  return (
+    <div style={{ maxWidth: 1000 }}>
+      <Bloque titulo="Participación"
+              nota={<>La condición de cada persona se verifica contra el padrón académico
+                    vigente en {periodoTexto}, no contra el de hoy: quien en 2022 era
+                    estudiante y hoy es egresado figura como estudiante en el informe de 2022.</>}>
+        {desglose && desglose.total > 0 && (
+          <div className="fc-grid" style={{ margin: '4px 0 26px' }}>
+            <Cifra label="Participantes" valor={desglose.total}
+                   nota={`${desglose.asistieron} con participación registrada`} />
+            <Cifra label="Estudiantes" valor={desglose.estudiantes}
+                   nota="matriculados en el período" />
+            <Cifra label="Egresados" valor={desglose.egresados} nota="ya egresados entonces" />
+            <Cifra label="Externos" valor={desglose.externos}
+                   nota={desglose.docentes > 0 ? `${desglose.docentes} docentes aparte` : 'sin registro académico'} />
+          </div>
+        )}
+        {desglose && desglose.sin_verificar > 0 && (
+          <p className="ayuda" style={{ color: 'var(--rojo-oscuro)', marginBottom: 16 }}>
+            {desglose.sin_verificar} sin verificar contra el padrón. Si son de un período
+            cuya nómina todavía no se importó, vuelva a verificar después de cargarla.
+          </p>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 22 }}>
+          {proyecto.actividad_id && (
+            <>
+              <button className="btn btn-secondary" disabled={trabajando}
+                      onClick={() => void accion(async () => {
+                        const r = await participantesDesdeActividad(proyecto.id, true)
+                        return `${r.agregados} traídos de la actividad; ${r.ya_estaban} ya estaban.`
+                      })}>
+                Traer a quienes asistieron
+              </button>
+              <button className="btn btn-ghost" disabled={trabajando}
+                      onClick={() => void accion(async () => {
+                        const r = await participantesDesdeActividad(proyecto.id, false)
+                        return `${r.agregados} traídos (incluye inscriptos sin asistencia).`
+                      })}>
+                Traer también a los inscriptos sin asistencia
+              </button>
+            </>
+          )}
+          <button className="btn btn-ghost" disabled={trabajando}
+                  onClick={() => void accion(async () => {
+                    const r = await verificarParticipantes(proyecto.id)
+                    return `${r.revisados} revisados, ${r.reclasificados} reclasificados.`
+                  })}>
+            Volver a verificar contra el padrón
+          </button>
+        </div>
+        <Aviso>{error}</Aviso>
+        <Aviso tono="nota">{aviso}</Aviso>
+
+        {filas.length === 0 ? (
+          <p className="tenue">
+            Todavía no hay participantes.
+            {proyecto.actividad_id
+              ? ' Tráigalos de la actividad vinculada, búsquelos en el padrón o cargue una nómina.'
+              : ' Búsquelos en el padrón o cargue una nómina.'}
+          </p>
+        ) : (
+          <div className="fc-scroll">
+            <table className="table" style={{ minWidth: 940 }}>
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>Condición</th><th>Matrícula</th><th>Carrera</th>
+                  <th>Organización</th><th>Origen</th><th />
+                </tr>
+              </thead>
+              <tbody>
+                {filas.map((f) => (
+                  <tr key={f.id}>
+                    <td className="obra">
+                      {f.nombre}
+                      {f.cedula_mascara && (
+                        <span className="tenue numeral" style={{ fontSize: 11, display: 'block' }}>
+                          {f.cedula_mascara}
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ fontSize: 13 }} title={f.condicion_origen ?? undefined}>
+                      {f.condicion ? CONDICIONES[f.condicion] : '—'}
+                      {f.periodo_verificado && (
+                        <span className="tenue" style={{ fontSize: 11, display: 'block' }}>
+                          {f.periodo_verificado}
+                        </span>
+                      )}
+                    </td>
+                    <td className="numeral" style={{ fontSize: 13 }}>{f.matricula ?? '—'}</td>
+                    <td style={{ fontSize: 13 }}>{f.carrera ?? '—'}</td>
+                    <td style={{ fontSize: 13 }}>{f.organizacion ?? f.catedra ?? '—'}</td>
+                    <td style={{ fontSize: 13, color: 'var(--tenue)' }}>{f.fuente}</td>
+                    <td>
+                      <button className="btn btn-ghost" style={{ fontSize: 13 }}
+                              onClick={() => void accion(async () => {
+                                await quitarParticipante(f.id)
+                                return 'Participante quitado.'
+                              })}>Quitar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Bloque>
+
+      <BuscadorPadron proyecto={proyecto} alAgregar={cargar} />
+      <CargaNomina proyecto={proyecto} alAgregar={cargar} />
+    </div>
+  )
+}
+
+const CONDICIONES: Record<string, string> = {
+  estudiante: 'Estudiante', docente: 'Docente', egresado: 'Egresado', externo: 'Externo',
+}
+
+function Cifra({ label, valor, nota }: { label: string; valor: number; nota: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: 13, color: 'var(--tenue)' }}>{label}</div>
+      <div className="numeral" style={{ fontFamily: 'var(--serif)', fontSize: 38,
+                                        lineHeight: 1.05 }}>{valor}</div>
+      <div style={{ fontSize: 13, color: 'rgba(32,30,29,0.55)' }}>{nota}</div>
+    </div>
+  )
+}
+
+/** Búsqueda en el registro académico para casos retrospectivos. */
+function BuscadorPadron({
+  proyecto, alAgregar,
+}: { proyecto: TProyecto; alAgregar: () => void }) {
+  const [q, setQ] = useState('')
+  const [resultados, setResultados] = useState<ResultadoPadron[]>([])
+  const [buscando, setBuscando] = useState(false)
+  const [aviso, setAviso] = useState('')
+
+  async function buscar() {
+    if (q.trim().length < 3) { setAviso('Escriba al menos tres letras.'); return }
+    setBuscando(true); setAviso('')
+    try { setResultados(await buscarPadron(q)) }
+    catch (e) { setAviso((e as Error).message) } finally { setBuscando(false) }
   }
 
   return (
-    <div style={{ maxWidth: 980 }}>
-      <Bloque titulo="Participantes del proyecto"
-              nota="Docentes y cátedra, funcionarios de la UNIDA, personas de otras instituciones y estudiantes. Para los estudiantes, el formato oficial pide nombre, cédula, carrera, ciclo y matrícula.">
-        <div className="fc-scroll">
-          <table className="matriz" style={{ minWidth: 900 }}>
+    <Bloque titulo="Buscar en el registro académico"
+            nota="Para proyectos anteriores al formulario de inscripción: se busca a la persona por nombre o matrícula y se la agrega con su condición del período correspondiente.">
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div className="field" style={{ minWidth: 260 }}>
+          <label htmlFor="bp">Nombre o matrícula</label>
+          <input id="bp" className="input" value={q}
+                 onChange={(e) => setQ(e.target.value)}
+                 onKeyDown={(e) => { if (e.key === 'Enter') void buscar() }} />
+        </div>
+        <button className="btn btn-secondary" onClick={() => void buscar()} disabled={buscando}>
+          {buscando ? 'Buscando…' : 'Buscar'}
+        </button>
+      </div>
+      <Aviso tono="nota">{aviso}</Aviso>
+
+      {resultados.length > 0 && (
+        <div className="fc-scroll" style={{ marginTop: 14 }}>
+          <table className="table" style={{ minWidth: 700 }}>
             <thead>
-              <tr>
-                <th style={{ width: 150 }}>Tipo</th>
-                <th style={{ minWidth: 200 }}>Nombre y apellido</th>
-                <th>Cátedra u organización</th>
-                <th style={{ width: 120 }}>Carrera</th>
-                <th style={{ width: 110 }}>Ciclo</th>
-                <th style={{ width: 120 }}>Matrícula</th>
-                <th style={{ width: 70 }} />
-              </tr>
+              <tr><th>Nombre</th><th>Matrícula</th><th>Período</th><th>Condición</th>
+                  <th>Carrera</th><th /></tr>
             </thead>
             <tbody>
-              {filas.map((f, i) => (
-                <tr key={i}>
-                  <td>
-                    <select value={f.tipo} aria-label="Tipo"
-                            style={{ width: '100%', border: 0, background: 'transparent', font: 'inherit' }}
-                            onChange={(e) => set(i, { tipo: e.target.value as TipoParticipante })}>
-                      {TIPOS_PARTICIPANTE.map((t) => (
-                        <option key={t.id} value={t.id}>{t.label}</option>
-                      ))}
-                    </select>
+              {resultados.map((r) => (
+                <tr key={`${r.cedula_hash}-${r.periodo}`}>
+                  <td className="obra">{r.nombre}</td>
+                  <td className="numeral" style={{ fontSize: 13 }}>{r.matricula ?? '—'}</td>
+                  <td style={{ fontSize: 13 }}>{r.periodo}</td>
+                  <td style={{ fontSize: 13 }}>
+                    {r.condicion === 'estudiante' ? 'Estudiante' : 'Egresado'}
                   </td>
-                  <td><input value={f.nombre} aria-label="Nombre"
-                             onChange={(e) => set(i, { nombre: e.target.value })} /></td>
-                  <td><input value={f.tipo === 'externo' ? (f.organizacion ?? '') : (f.catedra ?? '')}
-                             aria-label="Cátedra u organización"
-                             onChange={(e) => set(i, f.tipo === 'externo'
-                               ? { organizacion: e.target.value } : { catedra: e.target.value })} /></td>
-                  <td><input value={f.carrera ?? ''} aria-label="Carrera"
-                             onChange={(e) => set(i, { carrera: e.target.value })} /></td>
-                  <td><input value={f.ciclo ?? ''} aria-label="Ciclo"
-                             onChange={(e) => set(i, { ciclo: e.target.value })} /></td>
-                  <td><input value={f.matricula ?? ''} aria-label="Matrícula"
-                             onChange={(e) => set(i, { matricula: e.target.value })} /></td>
+                  <td style={{ fontSize: 13 }}>{r.carrera ?? '—'}</td>
                   <td>
-                    <button className="btn btn-ghost" style={{ fontSize: 12 }}
-                            onClick={() => { setFilas(filas.filter((_, j) => j !== i)); setSucio(true) }}>
-                      Quitar
-                    </button>
+                    <button className="btn btn-ghost" style={{ fontSize: 13 }}
+                            onClick={() => {
+                              void agregarParticipantes(proyecto.id, [{
+                                nombre: r.nombre, cedula_hash: r.cedula_hash,
+                                matricula: r.matricula ?? undefined,
+                              }], 'padron')
+                                .then(() => { setAviso(`${r.nombre} agregado.`); alAgregar() })
+                                .catch((e: Error) => setAviso(e.message))
+                            }}>Agregar</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-          {TIPOS_PARTICIPANTE.map((t) => (
-            <button key={t.id} className="btn btn-secondary" style={{ fontSize: 13 }}
-                    onClick={() => {
-                      setFilas([...filas, {
-                        id: '', proyecto_id: proyectoId, tipo: t.id, nombre: '',
-                        cedula_mascara: null, matricula: null, carrera: null, ciclo: null,
-                        catedra: null, organizacion: null, orden: filas.length,
-                      }])
-                      setSucio(true)
-                    }}>
-              + {etiquetaTipoParticipante(t.id)}
-            </button>
-          ))}
-        </div>
-        <div style={{ marginTop: 18 }}>
-          <button className="btn btn-primary" onClick={() => void guardar()} disabled={!sucio}>
-            Guardar participantes
-          </button>
-        </div>
-        <Aviso tono="nota">{aviso}</Aviso>
-        <p className="ayuda" style={{ marginTop: 12 }}>
-          La cédula de los estudiantes no se pide acá: si la persona se inscribió por el
-          formulario, ya está cifrada en su inscripción, y la matrícula la completa el cruce
-          con el padrón académico.
-        </p>
-      </Bloque>
-    </div>
+      )}
+    </Bloque>
   )
+}
+
+/** Carga masiva de participantes desde una lista pegada. */
+function CargaNomina({
+  proyecto, alAgregar,
+}: { proyecto: TProyecto; alAgregar: () => void }) {
+  const [texto, setTexto] = useState('')
+  const [aviso, setAviso] = useState('')
+  const [trabajando, setTrabajando] = useState(false)
+
+  const filas = useMemo(() => leerNomina(texto), [texto])
+
+  return (
+    <Bloque titulo="Cargar una nómina"
+            nota="Una persona por línea. Se admite «Nombre», «Nombre, cédula» o «Nombre, cédula, organización». Quien figure en el padrón se reconoce solo; el resto queda como externo.">
+      <div className="field">
+        <label htmlFor="nom">Lista de participantes</label>
+        <textarea id="nom" className="input" style={{ minHeight: 120, fontFamily: 'monospace',
+                                                      fontSize: 13 }}
+                  value={texto} onChange={(e) => setTexto(e.target.value)}
+                  placeholder={'Pérez, Juan, 1234567\nGonzález, Ana\nComisión vecinal — Rosa Díaz'} />
+      </div>
+      {filas.length > 0 && (
+        <p style={{ fontSize: 13, color: 'var(--tenue)' }}>
+          {filas.length} personas reconocidas; {filas.filter((f) => f.cedula).length} con documento.
+        </p>
+      )}
+      <button className="btn btn-primary" disabled={trabajando || filas.length === 0}
+              onClick={() => {
+                setTrabajando(true); setAviso('')
+                void agregarParticipantes(proyecto.id, filas, 'nomina')
+                  .then((r) => {
+                    setAviso(`${r.agregados} agregados, ${r.ya_estaban} ya estaban, ` +
+                             `${r.omitidos} omitidos.`)
+                    setTexto(''); alAgregar()
+                  })
+                  .catch((e: Error) => setAviso(e.message))
+                  .finally(() => setTrabajando(false))
+              }}>
+        {trabajando ? 'Cargando…' : `Agregar ${filas.length} participantes`}
+      </button>
+      <Aviso tono="nota">{aviso}</Aviso>
+    </Bloque>
+  )
+}
+
+/** «Apellido, Nombre, 1234567, Organización» en cualquier combinación. */
+export function leerNomina(texto: string): FilaParticipante[] {
+  return texto.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((linea) => {
+    const partes = linea.split(/\s*[;|\t]\s*|\s+—\s+/).map((p) => p.trim()).filter(Boolean)
+    const campos = partes.length > 1 ? partes : linea.split(/\s*,\s*/).map((p) => p.trim())
+    // Se toma como documento el campo que sea mayormente numérico y de 5 a 12 signos.
+    const iDoc = campos.findIndex((c) => /^[0-9][0-9.\-]{4,13}$/.test(c))
+    const doc = iDoc >= 0 ? campos[iDoc] : undefined
+    const resto = campos.filter((_, i) => i !== iDoc)
+    // Con «Apellido, Nombre» el nombre son los dos primeros campos.
+    const nombre = resto.length >= 2 && resto[0]!.length < 40 && !/\d/.test(resto[1] ?? '')
+      ? `${resto[0]}, ${resto[1]}` : (resto[0] ?? '')
+    const organizacion = resto.length > 2 ? resto[resto.length - 1] : undefined
+    return { nombre, cedula: doc, organizacion: organizacion === nombre ? undefined : organizacion }
+  }).filter((f) => f.nombre.length > 2)
 }
 
 function Informes({ proyecto }: { proyecto: TProyecto }) {
