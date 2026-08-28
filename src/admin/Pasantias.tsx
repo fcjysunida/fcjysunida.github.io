@@ -255,7 +255,14 @@ export default function Pasantias() {
       {/* ── Nómina ────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
                     gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>Nómina</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+          Nómina
+          {filas && (
+            <span className="tenue" style={{ fontSize: 14, fontFamily: 'var(--sans)' }}>
+              {' '}— {filas.length} personas
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <input className="input" style={{ width: 200 }} placeholder="Nombre o matrícula"
                  value={texto} onChange={(e) => setTexto(e.target.value)} />

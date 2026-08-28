@@ -482,7 +482,7 @@ export const extensionNomina = (f: {
 }) => rpc<FilaExtension[]>('extension_nomina', {
   p_periodo: f.periodo || null, p_condicion: f.condicion || null,
   p_texto: f.texto || null, p_solo_deuda: f.soloDeuda ?? false,
-  p_limite: f.limite ?? 300,
+  p_limite: f.limite ?? 1000,
 })
 
 export const acreditarHoras = (a: {
@@ -565,7 +565,7 @@ export const pasantiasNomina = (f: {
 }) => rpc<FilaPasantia[]>('pasantias_nomina', {
   p_periodo: f.periodo || null, p_condicion: f.condicion || null,
   p_texto: f.texto || null, p_solo_deuda: f.soloDeuda ?? false,
-  p_limite: f.limite ?? 300,
+  p_limite: f.limite ?? 1000,
 })
 
 export const guardarPasantia = (datos: Record<string, unknown>) =>
