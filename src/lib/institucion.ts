@@ -17,3 +17,15 @@ export const basePublica = () => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   return window.location.origin + base
 }
+
+/** Enlace pensado para compartir por WhatsApp, correo o redes.
+ *
+ *  GitHub Pages no conoce las rutas de la aplicación: ante /f/:token responde
+ *  404.html con estado 404, y casi ningún rastreador arma vista previa sobre un
+ *  404. La función `enlace` responde 200 con las etiquetas Open Graph de la
+ *  actividad y redirige a quien hace clic. Es más largo, pero se ve.  */
+export const enlaceCompartible = (tipo: 'f' | 'a', token: string) => {
+  const api = import.meta.env.VITE_SUPABASE_URL
+  if (!api) return `${basePublica()}/${tipo}/${token}`
+  return `${api.replace(/\/$/, '')}/functions/v1/enlace/${tipo}/${token}`
+}

@@ -111,3 +111,31 @@ export function Dato({ label, valor, nota, tono = 'neutro' }: {
     </div>
   )
 }
+
+/** Campo de texto con sugerencias. Se puede elegir de la lista o escribir algo
+ *  nuevo: `datalist` no restringe, propone. */
+export function CampoSugerido({
+  etiqueta, valor, onChange, opciones, id, placeholder, ayuda,
+}: {
+  etiqueta: string; valor: string; onChange: (v: string) => void
+  opciones: string[]; id: string; placeholder?: string; ayuda?: string
+}) {
+  const listaId = `sug-${id}`
+  return (
+    <label className="field">
+      <label htmlFor={id}>{etiqueta}</label>
+      <input
+        id={id}
+        className="input"
+        list={listaId}
+        value={valor}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <datalist id={listaId}>
+        {opciones.map((o) => <option key={o} value={o} />)}
+      </datalist>
+      {ayuda && <span className="ayuda">{ayuda}</span>}
+    </label>
+  )
+}

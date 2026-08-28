@@ -15,9 +15,9 @@ import {
   CLASIFICACIONES, ESTADOS_PROYECTO, RUBROS, FUENTES, CREDITOS, DESTINATARIOS,
 } from '../lib/proyecto'
 import { fechaCorta, hoyAsuncion } from '../lib/formato'
-import { listarCarreras } from '../data/panel'
+import { listarCarreras, listarCatedras } from '../data/panel'
 import type { Carrera } from '../data/panel'
-import { Cargando, Aviso } from '../ui/piezas'
+import { Cargando, Aviso, CampoSugerido } from '../ui/piezas'
 import { Bloque, Campo, Area, Lineas, Filas, Matriz, Casillas } from './piezas-proyecto'
 
 type Pestana = 'propuesta' | 'participantes' | 'informes'
@@ -27,6 +27,7 @@ export default function Proyecto() {
   const [p, setP] = useState<TProyecto | null>(null)
   const [periodos, setPeriodos] = useState<PeriodoAcademico[]>([])
   const [carreras, setCarreras] = useState<Carrera[]>([])
+  const [catedras, setCatedras] = useState<string[]>([])
   const [acts, setActs] = useState<Actividad[]>([])
   const [pest, setPest] = useState<Pestana>('propuesta')
   const [aviso, setAviso] = useState('')
@@ -38,6 +39,7 @@ export default function Proyecto() {
     listarPeriodos().then(setPeriodos).catch(() => setPeriodos([]))
     listarActividades().then(setActs).catch(() => setActs([]))
     listarCarreras().then(setCarreras).catch(() => setCarreras([]))
+    listarCatedras().then(setCatedras).catch(() => setCatedras([]))
   }, [id])
 
   const set = <K extends keyof TProyecto>(k: K, v: TProyecto[K]) => {
@@ -149,8 +151,12 @@ export default function Proyecto() {
                   ))}
                 </div>
               </div>
-              <Campo etiqueta="Curso o cátedra" valor={p.curso ?? ''}
-                     onChange={(v) => set('curso', v)} />
+              <CampoSugerido id="curso" etiqueta="Curso o cátedra" valor={p.curso ?? ''}
+                             opciones={catedras} onChange={(v) => set('curso', v)}
+                             placeholder="Escriba o elija de las ya cargadas"
+                             ayuda={catedras.length > 0
+                               ? `${catedras.length} cátedras ya registradas`
+                               : undefined} />
             </div>
             <Area etiqueta="Entregable final del proyecto" valor={p.entregable ?? ''}
                   onChange={(v) => set('entregable', v)} />

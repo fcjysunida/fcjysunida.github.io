@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { listarEventos, guardarEvento, listarCarreras } from '../data/panel'
 import type { Evento, Carrera } from '../data/panel'
 import { fechaCorta, numero } from '../lib/formato'
 import { usePermisos } from '../lib/sesion'
 import { Cargando, Aviso, Dato } from '../ui/piezas'
+import { Icono } from '../ui/iconos'
 
 const TIPOS: { id: string; label: string }[] = [
   { id: 'reunion_empresa',     label: 'Reunión con empresa u organismo' },
@@ -93,22 +95,33 @@ export default function Eventos() {
 
   return (
     <div>
-      <div className="eyebrow">Vinculación</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Eventos y actividades</h1>
+      <div className="eyebrow">Extensión — sin inscripción</div>
+      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Registros de actividad</h1>
       <p style={{ maxWidth: '78ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
-        Reuniones con empresas, visitas, ferias de empleo y firmas de convenio: actividades
-        que no pasan por el formato oficial 9 pero que igual dejan constancia. Llevan informe
-        de actividad, nómina de participantes y, si corresponde, certificación —lo que piden
+        Reuniones con empresas, visitas, ferias de empleo y firmas de convenio. Se cargan
+        <strong> después de que ocurrieron</strong>: no abren formulario ni toman asistencia.
+        Llevan informe, nómina cargada a mano y, si corresponde, certificación —lo que piden
         los artículos 19 y 20 del Reglamento de Proyección Social y Extensión Universitaria.
-        Muchas se vinculan a la gestión de pasantías.
       </p>
+
+      <div className="tarjeta" style={{ padding: '14px 18px', marginTop: 18,
+                                        display: 'flex', gap: 12, alignItems: 'flex-start',
+                                        maxWidth: '78ch' }}>
+        <Icono nombre="actividad" tam={20} />
+        <div style={{ fontSize: 14 }}>
+          <strong>¿Necesita que la gente se inscriba?</strong> Entonces no es un registro:
+          es una <Link to="/admin/nueva">actividad</Link>. Las actividades abren un
+          formulario público, toman asistencia por código de sala, emiten constancias y
+          miden satisfacción. Los registros no hacen nada de eso: solo dejan constancia.
+        </div>
+      </div>
 
       <hr className="rule-strong" style={{ margin: '28px 0' }} />
       <Aviso>{error}</Aviso>
       <Aviso tono="nota">{aviso}</Aviso>
 
       <div className="fc-grid" style={{ marginBottom: 30 }}>
-        <Dato label="Eventos registrados" valor={numero(eventos.length)} />
+        <Dato label="Registros cargados" valor={numero(eventos.length)} />
         <Dato label="Con informe presentado" valor={numero(conInforme)}
               nota="art. 19 del reglamento" />
         <Dato label="Ligados a pasantías" valor={numero(dePasantia)} />
@@ -116,14 +129,14 @@ export default function Eventos() {
 
       {permisos.edita && !abierto && (
         <button className="btn btn-primary" style={{ marginBottom: 26 }} onClick={abrirNuevo}>
-          Registrar un evento
+          Cargar un registro
         </button>
       )}
 
       {abierto && (
         <div className="tarjeta" style={{ padding: 22, marginBottom: 30, maxWidth: 780 }}>
           <div style={{ fontFamily: 'var(--serif)', fontSize: 19, marginBottom: 16 }}>
-            {form.id ? 'Editar el evento' : 'Nuevo evento'}
+            {form.id ? 'Editar el registro' : 'Nuevo registro'}
           </div>
 
           <div style={{ display: 'grid', gap: 16,
@@ -239,7 +252,7 @@ export default function Eventos() {
       )}
 
       {eventos.length === 0 ? (
-        <p className="tenue">Todavía no hay eventos registrados.</p>
+        <p className="tenue">Todavía no hay registros cargados.</p>
       ) : (
         <div className="fc-scroll">
           <table className="table">

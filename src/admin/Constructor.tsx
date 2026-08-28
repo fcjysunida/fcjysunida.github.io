@@ -7,7 +7,8 @@ import {
   TIPOS_CAMPO, TIPOS_ACTIVIDAD, MODALIDADES, PORTADAS,
   camposHabituales, conOpciones, nuevoId, etiquetaCampo,
 } from '../lib/campos'
-import { basePublica, RETENCION_MESES, LEY } from '../lib/institucion'
+import { basePublica, enlaceCompartible, RETENCION_MESES, LEY } from '../lib/institucion'
+import { Icono } from '../ui/iconos'
 import { diaLargo, hoyAsuncion } from '../lib/formato'
 import { usePermisos } from '../lib/sesion'
 import { Aviso } from '../ui/piezas'
@@ -69,10 +70,11 @@ export default function Constructor() {
         Nueva actividad y su formulario de inscripción
       </h1>
       <p style={{ maxWidth: '66ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
-        Los campos se agregan, ordenan y tipifican libremente. Cada campo declara si es
-        obligatorio, si se guarda cifrado y si contiene datos sensibles en el sentido del
-        artículo 3.° numeral 7 de la {LEY}, lo que activa el consentimiento expreso separado
-        y el borrado anticipado.
+        Los campos se agregan, ordenan y tipifican libremente. Solo hay dos decisiones por
+        campo: si es obligatorio y si contiene datos sensibles en el sentido del artículo
+        3.° numeral 7 de la {LEY}, lo que activa el consentimiento expreso separado y el
+        borrado anticipado. El cifrado no se elige: la cédula y el teléfono se guardan
+        cifrados siempre, y un dato sensible también.
       </p>
       <hr className="rule-strong" style={{ margin: '30px 0' }} />
 
@@ -287,7 +289,7 @@ function FilaCampo({
                       const t = e.target.value as TipoCampo
                       cambiar({
                         tipo: t,
-                        cifrado: t === 'cedula' ? true : campo.cifrado,
+                        cifrado: t === 'cedula' || t === 'tel' ? true : campo.sensible ? true : false,
                         opciones: conOpciones(t) && (campo.opciones ?? []).length === 0
                           ? ['Primera opción', 'Segunda opción'] : campo.opciones,
                       })
@@ -331,14 +333,20 @@ function FilaCampo({
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap', alignItems: 'center' }}>
           <Marca marcada={!!campo.obligatorio} onChange={(v) => cambiar({ obligatorio: v })}
                  texto="Obligatorio" />
-          <Marca marcada={!!campo.cifrado} onChange={(v) => cambiar({ cifrado: v })}
-                 texto="Identificador — se guarda cifrado" />
           <Marca marcada={!!campo.sensible}
                  onChange={(v) => cambiar({ sensible: v, cifrado: v ? true : campo.cifrado })}
                  texto="Dato sensible — consentimiento expreso y borrado anticipado" />
+          {/* El cifrado no se elige: lo determina el tipo de campo. Cédula y
+              teléfono se guardan cifrados siempre, y un dato sensible también.
+              Se muestra como consecuencia, no como una casilla más que decidir. */}
+          {campo.cifrado && (
+            <span className="chip" title="Se guarda cifrado y solo se muestra enmascarado">
+              <Icono nombre="escudo" tam={14} /> Cifrado
+            </span>
+          )}
         </div>
 
         {campo.mapa ? (
@@ -384,7 +392,7 @@ function AgregarCampo({
       </div>
       <button className="btn btn-secondary" onClick={() => setCampos((cs) => [...cs, {
         id: nuevoId(), tipo, etiqueta: '', ayuda: '', obligatorio: false,
-        cifrado: tipo === 'cedula', sensible: false, mapa: '',
+        cifrado: tipo === 'cedula' || tipo === 'tel', sensible: false, mapa: '',
         opciones: conOpciones(tipo) ? ['Primera opción', 'Segunda opción'] : [],
       }])}>
         Agregar campo
@@ -411,10 +419,12 @@ function Publicada({ enlaces, alReiniciar }: { enlaces: Enlaces; alReiniciar: ()
       <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
         <Enlace rotulo="Enlace de inscripción — se difunde a los participantes"
                 url={`${base}/f/${enlaces.token_formulario}`}
-                copiado={copiado === 'f'} onCopiar={() => copiar(`${base}/f/${enlaces.token_formulario}`, 'f')} />
+                compartir={enlaceCompartible('f', enlaces.token_formulario)}
+                copiado={copiado} onCopiar={copiar} clave="f" />
         <Enlace rotulo="Enlace único de asistencia — válido todas las jornadas"
                 url={`${base}/a/${enlaces.token_asistencia}`}
-                copiado={copiado === 'a'} onCopiar={() => copiar(`${base}/a/${enlaces.token_asistencia}`, 'a')} />
+                compartir={enlaceCompartible('a', enlaces.token_asistencia)}
+                copiado={copiado} onCopiar={copiar} clave="a" />
 
         <div>
           <hr className="rule" style={{ marginBottom: 18 }} />
@@ -454,15 +464,32 @@ function Publicada({ enlaces, alReiniciar }: { enlaces: Enlaces; alReiniciar: ()
 }
 
 function Enlace({
-  rotulo, url, copiado, onCopiar,
-}: { rotulo: string; url: string; copiado: boolean; onCopiar: () => void }) {
+  rotulo, url, compartir, copiado, onCopiar, clave,
+}: {
+  rotulo: string; url: string; compartir: string
+  copiado: string; onCopiar: (t: string, c: string) => void; clave: string
+}) {
   return (
     <div>
-      <div style={{ fontSize: 13, color: 'var(--tenue)' }}>{rotulo}</div>
+      <div style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{rotulo}</div>
       <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', flexWrap: 'wrap' }}>
         <div style={{ fontFamily: 'var(--serif)', fontSize: 19, wordBreak: 'break-all' }}>{url}</div>
-        <button className="btn btn-ghost" onClick={onCopiar}>
-          {copiado ? 'Enlace copiado' : 'Copiar'}
+        <button className="btn btn-ghost" onClick={() => onCopiar(url, clave)}>
+          {copiado === clave ? 'Enlace copiado' : 'Copiar'}
+        </button>
+      </div>
+      {/* GitHub Pages responde 404 en las rutas de la aplicación y los
+          rastreadores no arman vista previa sobre un 404. Este otro enlace
+          lleva al mismo lugar y sí muestra título, fecha y portada. */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
+                    marginTop: 8 }}>
+        <span className="chip chip-primario">Con vista previa</span>
+        <span className="tenue" style={{ fontSize: 12.5 }}>
+          para WhatsApp, correo y redes
+        </span>
+        <button className="btn btn-ghost" style={{ fontSize: 13 }}
+                onClick={() => onCopiar(compartir, clave + '-p')}>
+          {copiado === clave + '-p' ? 'Copiado' : 'Copiar el enlace con vista previa'}
         </button>
       </div>
     </div>

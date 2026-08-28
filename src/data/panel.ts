@@ -604,3 +604,25 @@ export const guardarEvento = (datos: Record<string, unknown>) =>
 export const eventoParticipantes = (evento: string, filas: Record<string, unknown>[]) =>
   rpc<{ ok: boolean; agregados: number; ya_estaban: number; omitidos: number }>(
     'evento_participantes_agregar', { p_evento: evento, p_filas: filas })
+
+/** Cátedras ya usadas, para sugerirlas al cargar un proyecto. Las materias se
+ *  repiten período a período: escribirlas de nuevo cada vez invita a que la
+ *  misma cátedra quede con tres grafías distintas. */
+export async function listarCatedras(): Promise<string[]> {
+  const [proy, doc] = await Promise.all([
+    supabase.from('proyectos').select('curso').not('curso', 'is', null),
+    supabase.from('docentes').select('catedras'),
+  ])
+  const set = new Set<string>()
+  for (const r of proy.data ?? []) {
+    const v = (r as { curso: string | null }).curso?.trim()
+    if (v && v.length > 2 && v !== '( )') set.add(v)
+  }
+  for (const r of doc.data ?? []) {
+    for (const c of (r as { catedras: string[] | null }).catedras ?? []) {
+      const v = c?.trim()
+      if (v && v.length > 2) set.add(v)
+    }
+  }
+  return [...set].sort((a, b) => a.localeCompare(b, 'es'))
+}

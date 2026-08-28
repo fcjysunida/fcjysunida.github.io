@@ -340,7 +340,7 @@ label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) {
 
 /* Fichas de navegación, con forma de píldora. */
 .nav-tab {
-  display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px;
+  display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 16px;
   border-radius: var(--forma-completa); text-decoration: none;
   font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant);
   transition: background var(--mov-rapido), color var(--mov-rapido);
@@ -354,7 +354,7 @@ label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) {
 /* Segundo nivel: más liviano, con indicador de línea en vez de píldora, para
    que se lea como dependiente del primero y no compita con él. */
 .nav-sub {
-  display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 12px;
   border-radius: var(--forma-s); text-decoration: none;
   font-size: 13.5px; font-weight: 500; color: var(--md-on-surface-variant);
   border-bottom: 2px solid transparent;

@@ -5,6 +5,7 @@ import { etiquetaRol } from '../lib/campos'
 import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
 import { InterruptorTema } from '../lib/tema'
 import { GRUPOS, grupoDe } from './navegacion'
+import { Icono } from '../ui/iconos'
 
 
 export default function MarcoAdmin({ children }: { children: ReactNode }) {
@@ -40,7 +41,9 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         {/* Primer nivel: seis entradas. Cada grupo lleva a su primera pantalla. */}
         <div className="limite" style={{ paddingTop: 12 }}>
           <nav className="fc-tabs" aria-label="Secciones del panel">
-            <NavLink to="/admin" end className="nav-tab">Panel</NavLink>
+            <NavLink to="/admin" end className="nav-tab">
+              <Icono nombre="panel" tam={18} /> Panel
+            </NavLink>
             {/* Link y no NavLink: NavLink calcula su propio aria-current contra la
                 ruta exacta y pisaría el del grupo. Acá lo marca el grupo activo,
                 que puede ser cualquiera de sus pantallas. */}
@@ -51,7 +54,7 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
                 className="nav-tab"
                 aria-current={grupoActivo?.id === g.id ? 'page' : undefined}
               >
-                {g.label}
+                <Icono nombre={g.icono} tam={18} /> {g.label}
               </Link>
             ))}
           </nav>
@@ -63,7 +66,7 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
             <nav className="fc-tabs" aria-label={`Dentro de ${grupoActivo.label}`}>
               {grupoActivo.items.map((it) => (
                 <NavLink key={it.a} to={it.a} className="nav-sub" title={it.nota}>
-                  {it.label}
+                  <Icono nombre={it.icono} tam={16} /> {it.label}
                 </NavLink>
               ))}
             </nav>

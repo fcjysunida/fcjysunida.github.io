@@ -4,53 +4,48 @@
  *  Ahora hay seis entradas de primer nivel y el segundo nivel aparece solo para
  *  el grupo en el que uno está: se ve menos y se encuentra antes. */
 
-export type Entrada = { a: string; label: string; nota?: string }
-export type Grupo = { id: string; label: string; items: Entrada[] }
+export type Entrada = { a: string; label: string; nota?: string; icono: string }
+export type Grupo = { id: string; label: string; icono: string; items: Entrada[] }
 
 export const GRUPOS: Grupo[] = [
   {
-    id: 'actividades',
-    label: 'Actividades',
+    id: 'actividades', label: 'Actividades', icono: 'actividad',
     items: [
-      { a: '/admin/nueva',         label: 'Nueva actividad', nota: 'Constructor del formulario' },
-      { a: '/admin/inscripciones', label: 'Inscripciones',   nota: 'Ver y editar inscriptos' },
-      { a: '/admin/asistencia',    label: 'Asistencia',      nota: 'Registrar por jornada' },
-      { a: '/admin/certificados',  label: 'Constancias',     nota: 'Emitir e imprimir' },
+      { a: '/admin/nueva',         label: 'Nueva actividad', icono: 'mas',        nota: 'Constructor del formulario' },
+      { a: '/admin/inscripciones', label: 'Inscripciones',   icono: 'personas',   nota: 'Ver y editar inscriptos' },
+      { a: '/admin/asistencia',    label: 'Asistencia',      icono: 'ok',         nota: 'Registrar por jornada' },
+      { a: '/admin/certificados',  label: 'Constancias',     icono: 'constancia', nota: 'Emitir e imprimir' },
     ],
   },
   {
-    id: 'extension',
-    label: 'Extensión',
+    id: 'extension', label: 'Extensión', icono: 'extension',
     items: [
-      { a: '/admin/proyectos', label: 'Proyectos', nota: 'Formatos oficiales 9 y 10' },
-      { a: '/admin/eventos',   label: 'Eventos',   nota: 'Reuniones, visitas y convenios' },
+      { a: '/admin/proyectos', label: 'Proyectos', icono: 'libro',      nota: 'Formatos oficiales 9 y 10' },
+      { a: '/admin/eventos',   label: 'Registros',  icono: 'calendario', nota: 'Sin inscripción: se cargan después' },
     ],
   },
   {
-    id: 'estudiantes',
-    label: 'Estudiantes',
+    id: 'estudiantes', label: 'Estudiantes', icono: 'estudiantes',
     items: [
-      { a: '/admin/padron',    label: 'Padrón',             nota: 'Nómina por período' },
-      { a: '/admin/extension', label: 'Horas de extensión', nota: 'Cumplimiento por persona' },
-      { a: '/admin/pasantias', label: 'Pasantías',          nota: 'Seguimiento y plazos' },
+      { a: '/admin/padron',    label: 'Padrón',             icono: 'personas', nota: 'Nómina por período' },
+      { a: '/admin/extension', label: 'Horas de extensión', icono: 'reloj',    nota: 'Cumplimiento por persona' },
+      { a: '/admin/pasantias', label: 'Pasantías',          icono: 'maletin',  nota: 'Seguimiento y plazos' },
     ],
   },
   {
-    id: 'informes',
-    label: 'Informes',
+    id: 'informes', label: 'Informes', icono: 'informes',
     items: [
-      { a: '/admin/indicadores', label: 'Estadísticas', nota: 'Informe mensual DTC' },
-      { a: '/admin/calidad',     label: 'Calidad',      nota: 'CSAT y NPS por actividad' },
+      { a: '/admin/indicadores', label: 'Estadísticas', icono: 'informes', nota: 'Informe mensual DTC' },
+      { a: '/admin/calidad',     label: 'Calidad',      icono: 'ok',       nota: 'CSAT y NPS por actividad' },
     ],
   },
   {
-    id: 'institucion',
-    label: 'Institución',
+    id: 'institucion', label: 'Institución', icono: 'institucion',
     items: [
-      { a: '/admin/normas',    label: 'Normograma',         nota: 'Marco normativo' },
-      { a: '/admin/usuarios',  label: 'Usuarios',           nota: 'Acceso y roles' },
-      { a: '/admin/seguridad', label: 'Protección de datos', nota: 'Auditoría y derechos' },
-      { a: '/admin/ajustes',   label: 'Ajustes',            nota: 'Correo, IA y parámetros' },
+      { a: '/admin/normas',    label: 'Normograma',          icono: 'libro',    nota: 'Marco normativo' },
+      { a: '/admin/usuarios',  label: 'Usuarios',            icono: 'personas', nota: 'Acceso y roles' },
+      { a: '/admin/seguridad', label: 'Protección de datos', icono: 'escudo',   nota: 'Auditoría y derechos' },
+      { a: '/admin/ajustes',   label: 'Ajustes',             icono: 'ajustes',  nota: 'Correo, IA y parámetros' },
     ],
   },
 ]
