@@ -22,6 +22,7 @@ import Extension from './admin/Extension'
 import Pasantias from './admin/Pasantias'
 import Eventos from './admin/Eventos'
 import Normas from './admin/Normas'
+import { ProveedorTema } from './lib/tema'
 import Certificados from './admin/Certificados'
 import Proyectos from './admin/Proyectos'
 import Proyecto from './admin/Proyecto'
@@ -45,6 +46,7 @@ export default function App() {
   // `basename` toma la base del build: sirve tanto en la raíz de un dominio
   // propio como bajo /fcjysunida/ en un repositorio corriente.
   return (
+    <ProveedorTema>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ProveedorSesion>
         <Routes>
@@ -82,5 +84,6 @@ export default function App() {
         </Routes>
       </ProveedorSesion>
     </BrowserRouter>
+    </ProveedorTema>
   )
 }

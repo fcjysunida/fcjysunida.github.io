@@ -62,7 +62,7 @@ export default function Derechos() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div className="field">
             <span id="rot-tipo" style={{ display: 'block', fontSize: 12, marginBottom: 8,
-                                         color: 'rgba(32,30,29,0.7)' }}>
+                                         color: 'var(--md-on-surface-variant)' }}>
               ¿Qué derecho desea ejercer?
             </span>
             <div role="radiogroup" aria-labelledby="rot-tipo"

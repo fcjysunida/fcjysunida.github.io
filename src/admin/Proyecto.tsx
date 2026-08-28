@@ -473,7 +473,7 @@ function Cifra({ label, valor, nota }: { label: string; valor: number; nota: str
       <div style={{ fontSize: 13, color: 'var(--tenue)' }}>{label}</div>
       <div className="numeral" style={{ fontFamily: 'var(--serif)', fontSize: 38,
                                         lineHeight: 1.05 }}>{valor}</div>
-      <div style={{ fontSize: 13, color: 'rgba(32,30,29,0.55)' }}>{nota}</div>
+      <div style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{nota}</div>
     </div>
   )
 }

@@ -99,7 +99,7 @@ export default function Formulario() {
   return (
     <Marco credito={credito}>
       <div className="tarjeta">
-        <div style={{ height: 190, overflow: 'hidden', background: '#e2e0e0' }}>
+        <div style={{ height: 190, overflow: 'hidden', background: 'var(--md-surface-c-highest)' }}>
           <img src={portada} alt="" className="grayscale"
                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
@@ -204,7 +204,7 @@ export default function Formulario() {
                   />
                 </div>
 
-                <p style={{ fontSize: 13, color: 'rgba(32,30,29,0.65)', margin: '18px 0 0' }}>
+                <p style={{ fontSize: 13, color: 'var(--md-on-surface-variant)', margin: '18px 0 0' }}>
                   Puede revocar el consentimiento en cualquier momento y ejercer los derechos de
                   acceso, rectificación, oposición, supresión y portabilidad escribiendo a{' '}
                   <a href={`mailto:${CORREO}`}>{CORREO}</a> o desde <a href="/derechos">/derechos</a>.
@@ -324,7 +324,7 @@ function CampoPublico({
     <div className="field">
       {conRadios
         ? <span id={`${campo.id}-rot`} style={{ display: 'block', fontSize: 12, marginBottom: 5,
-                                                color: 'rgba(32,30,29,0.7)' }}>{etiqueta}</span>
+                                                color: 'var(--md-on-surface-variant)' }}>{etiqueta}</span>
         : <label htmlFor={campo.id}>{etiqueta}</label>}
       {control()}
       {campo.ayuda && <span id={idAyuda} className="ayuda">{campo.ayuda}</span>}

@@ -68,7 +68,7 @@ export default function CheckIn() {
         <div>
           <div className="eyebrow">Registro de asistencia</div>
           <h1 style={{ fontSize: 27, lineHeight: 1.18, marginTop: 6 }}>{ctx.titulo}</h1>
-          <div style={{ fontSize: 14, color: 'rgba(32,30,29,0.65)', marginTop: 6 }}>
+          <div style={{ fontSize: 14, color: 'var(--md-on-surface-variant)', marginTop: 6 }}>
             {ctx.hay_jornada && ctx.fecha
               ? `Jornada ${ctx.jornada} — ${diaLargo(ctx.fecha)}`
               : 'Hoy no hay jornada activa para esta actividad.'}

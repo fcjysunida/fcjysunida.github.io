@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { etiquetaRol } from '../lib/campos'
 import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
+import { InterruptorTema } from '../lib/tema'
 
 const PESTANAS = [
   { a: '/admin',                 label: 'Panel', exacta: true },
@@ -27,25 +28,32 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
   const { rol, nombre, salir } = useSesion()
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* WCAG 2.4.1: primer elemento enfocable, salta la navegación. */}
+      <a className="salto-contenido" href="#principal">Ir al contenido</a>
+
       <header className="cinta">
-        <div className="limite" style={{ paddingTop: 20, display: 'flex', alignItems: 'center',
+        <div className="limite" style={{ paddingTop: 18, display: 'flex', alignItems: 'center',
                                          gap: 18, flexWrap: 'wrap' }}>
-          <img src="/assets/logo-fcjys.svg" alt={FACULTAD} style={{ height: 36, width: 'auto' }} />
-          <div style={{ flex: 1, minWidth: 120 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 13 }}>
-            <span className="tenue">
+          <img className="logo-institucional" src="/assets/logo-fcjys.svg" alt={FACULTAD}
+               style={{ height: 34 }} />
+          <div style={{ flex: 1, minWidth: 80 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <InterruptorTema />
+            <span className="tenue" style={{ fontSize: 13 }}>
               {nombre}{rol ? ` — ${etiquetaRol(rol)}` : ' — sin rol asignado'}
             </span>
-            <button className="btn btn-ghost" onClick={() => void salir()}>Salir</button>
+            <button className="btn btn-secondary" onClick={() => void salir()}>Salir</button>
           </div>
         </div>
+
         <div className="limite" style={{ paddingTop: 14 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19, letterSpacing: '-0.01em' }}>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: 21, letterSpacing: '-0.015em' }}>
             Inscripciones y asistencia
           </div>
         </div>
-        <div className="limite" style={{ paddingTop: 12 }}>
-          <nav className="fc-tabs">
+
+        <div className="limite" style={{ paddingTop: 12, paddingBottom: 12 }}>
+          <nav className="fc-tabs" aria-label="Secciones del panel">
             {PESTANAS.map((p) => (
               <NavLink key={p.a} to={p.a} end={p.exacta} className="nav-tab">{p.label}</NavLink>
             ))}
@@ -53,14 +61,16 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="limite" style={{ flex: 1, width: '100%', padding: '44px 28px 96px' }}>
+      <main id="principal" className="limite" tabIndex={-1}
+            style={{ flex: 1, width: '100%', padding: '40px 24px 96px' }}>
         {children}
       </main>
 
-      <footer style={{ borderTop: '1px solid var(--regla)', background: 'var(--papel)' }}>
-        <div className="limite" style={{ padding: '26px 28px', display: 'flex', flexWrap: 'wrap',
+      <footer style={{ borderTop: '1px solid var(--md-outline-variant)',
+                       background: 'var(--md-surface-c-low)' }}>
+        <div className="limite" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap',
                                          gap: 18, justifyContent: 'space-between',
-                                         fontSize: 13, color: 'rgba(32,30,29,0.65)' }}>
+                                         fontSize: 13, color: 'var(--md-on-surface-variant)' }}>
           <span>{FACULTAD}</span>
           <span>Responsable del tratamiento: {RESPONSABLE} — {CORREO}</span>
         </div>

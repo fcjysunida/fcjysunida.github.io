@@ -75,7 +75,7 @@ export default function Seguridad() {
           <div key={c.titulo} style={{ borderTop: '1px solid var(--regla)', paddingTop: 16 }}>
             <div style={{ fontSize: 13, color: 'var(--rojo-oscuro)' }}>{c.nivel}</div>
             <h2 style={{ fontSize: 20, marginTop: 4 }}>{c.titulo}</h2>
-            <p style={{ fontSize: 14, color: 'rgba(32,30,29,0.78)', margin: '8px 0 0' }}>{c.texto}</p>
+            <p style={{ fontSize: 14, color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>{c.texto}</p>
           </div>
         ))}
       </div>

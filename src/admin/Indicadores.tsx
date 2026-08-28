@@ -97,8 +97,8 @@ export default function Indicadores() {
                                                            fontFamily: 'var(--serif)', fontSize: 18 }}>
                             {it.valor}
                           </td>
-                          <td style={{ fontSize: 13, color: 'rgba(32,30,29,0.65)' }}>{it.unidad}</td>
-                          <td style={{ fontSize: 13, color: 'rgba(32,30,29,0.65)' }}>{it.origen}</td>
+                          <td style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{it.unidad}</td>
+                          <td style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{it.origen}</td>
                         </tr>
                       ))}
                     </tbody>

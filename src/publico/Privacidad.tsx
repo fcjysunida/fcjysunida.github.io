@@ -52,7 +52,7 @@ export default function Privacidad() {
         {CLAUSULAS.map((cl) => (
           <div key={cl.titulo}>
             <h2 style={{ fontSize: 21 }}>{cl.titulo}</h2>
-            <p style={{ color: 'rgba(32,30,29,0.82)', margin: '8px 0 0' }}>{cl.texto}</p>
+            <p style={{ color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>{cl.texto}</p>
             <div style={{ fontSize: 13, color: 'var(--tenue)', marginTop: 6, fontStyle: 'italic' }}>
               {cl.base}
             </div>

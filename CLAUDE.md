@@ -218,9 +218,21 @@ Además corre sola el día 1 de cada mes por `pg_cron`.
 - TypeScript estricto, sin `any`. El build corre `tsc -b` antes de Vite.
 - Acceso a datos solo por `src/data/publico.ts` (anónimo) y `src/data/panel.ts` (con sesión).
   Nada de consultas sueltas en los componentes.
-- Estilos: los tokens de `src/ui/estilos.css`, en el registro editorial del prototipo —
-  Spectral para títulos, Archivo para interfaz, rojo `#ec3013`, sin esquinas redondeadas,
-  reglas finas y ausencia de mayúsculas decorativas. Fotografías siempre en blanco y negro.
+- Estilos: los tokens de `src/ui/estilos.css`. El sistema es **Material 3 Expressive**
+  sobre la marca UNIDA: paleta tonal derivada del rojo institucional `#ec3013`, radios
+  grandes y variados, superficies tonales (`--md-surface-c-*`) en lugar de líneas, capas
+  de estado en los botones y movimiento con curva elástica. Spectral para títulos y
+  Archivo para interfaz. Fotografías siempre en blanco y negro.
+- **Nunca escribas un color literal en un componente.** Usá los tokens `--md-*`: un color
+  fijo se ve bien en un modo y se rompe en el otro. Los alias viejos (`--rojo`, `--tinta`,
+  `--papel`) apuntan a tokens y quedan solo por compatibilidad.
+- Modo claro y oscuro. El tema vive en `src/lib/tema.tsx`: «sistema» quita el atributo y
+  manda `prefers-color-scheme`; «claro» y «oscuro» ponen `data-tema` en la raíz y ganan en
+  ambos sentidos. Todo color se define en `:root` y se redefine en los dos bloques oscuros.
+- Accesibilidad WCAG 2.1 nivel AA. Está verificado y hay que mantenerlo: contraste 4,5:1
+  en texto y 3:1 en elementos no textuales, foco visible de 3 px, objetivos táctiles de
+  44 px, salto al contenido, `prefers-reduced-motion`, y todo gráfico con `role="img"`
+  más una tabla equivalente oculta. Si cambiás la paleta, recalculá los contrastes.
 - Todo texto de cara al público en español, registro institucional formal, y en las rutas
   públicas se trata de usted.
 - Los datos institucionales (correo, responsable, dominio) viven en `src/lib/institucion.ts`.

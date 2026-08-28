@@ -17,10 +17,10 @@ const MOTIVO_EGRESO =
 function Barra({ total, meta }: { total: number; meta: number }) {
   const pct = Math.min(100, meta > 0 ? (total / meta) * 100 : 0)
   return (
-    <div style={{ height: 6, background: 'rgba(32,30,29,0.10)', width: 92 }}>
+    <div style={{ height: 6, background: 'var(--md-surface-c-highest)', width: 92 }}>
       <div style={{
         height: '100%', width: `${pct}%`,
-        background: pct >= 100 ? 'var(--rojo)' : 'rgba(32,30,29,0.45)',
+        background: pct >= 100 ? 'var(--rojo)' : 'var(--md-on-surface-variant)',
       }} />
     </div>
   )
@@ -326,17 +326,17 @@ export default function Extension() {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <label>
-              <div style={{ fontSize: 12, marginBottom: 5, color: 'rgba(32,30,29,0.7)' }}>Horas</div>
+              <div style={{ fontSize: 12, marginBottom: 5, color: 'var(--md-on-surface-variant)' }}>Horas</div>
               <input className="input" type="number" min="0.5" step="0.5" style={{ width: 140 }}
                      value={horas} onChange={(e) => setHoras(e.target.value)} />
             </label>
             <label>
-              <div style={{ fontSize: 12, marginBottom: 5, color: 'rgba(32,30,29,0.7)' }}>Motivo</div>
+              <div style={{ fontSize: 12, marginBottom: 5, color: 'var(--md-on-surface-variant)' }}>Motivo</div>
               <input className="input" value={motivo} onChange={(e) => setMotivo(e.target.value)}
                      placeholder="En qué se basa la acreditación" />
             </label>
             <label>
-              <div style={{ fontSize: 12, marginBottom: 5, color: 'rgba(32,30,29,0.7)' }}>Detalle (opcional)</div>
+              <div style={{ fontSize: 12, marginBottom: 5, color: 'var(--md-on-surface-variant)' }}>Detalle (opcional)</div>
               <textarea className="input" rows={2} value={detalle}
                         onChange={(e) => setDetalle(e.target.value)}
                         placeholder="Actividades que se reconocen, resolución, expediente" />

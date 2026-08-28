@@ -147,7 +147,7 @@ export default function Constructor() {
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
                           gap: 16, flexWrap: 'wrap' }}>
               <h2 style={{ fontSize: 24 }}>Campos del formulario</h2>
-              <span style={{ fontSize: 13, color: 'rgba(32,30,29,0.55)' }}>{resumen}</span>
+              <span style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{resumen}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', marginTop: 18 }}>
@@ -180,7 +180,7 @@ export default function Constructor() {
                                    background: 'transparent', display: 'flex',
                                    flexDirection: 'column', gap: 8, opacity: elegida ? 1 : 0.72 }}>
                     <span style={{ display: 'block', width: '100%', height: 92, overflow: 'hidden',
-                                   background: '#e2e0e0',
+                                   background: 'var(--md-surface-c-highest)',
                                    outline: elegida ? '2px solid var(--rojo)' : '1px solid var(--regla)',
                                    outlineOffset: 2 }}>
                       <img src={p.url} alt="" className="grayscale"
@@ -267,10 +267,10 @@ function FilaCampo({
     })
 
   return (
-    <div style={{ borderTop: '1px solid rgba(32,30,29,0.18)', padding: '18px 0 20px',
+    <div style={{ borderTop: '1px solid var(--md-outline-variant)', padding: '18px 0 20px',
                   display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: 'var(--serif)', fontSize: 15, color: 'rgba(32,30,29,0.4)',
+        <span style={{ fontFamily: 'var(--serif)', fontSize: 15, color: 'var(--md-outline)',
                        minWidth: 26, paddingTop: 26 }}>{indice + 1}</span>
         <div style={{ flex: 1, minWidth: 260, display: 'grid', gap: 14,
                       gridTemplateColumns: '1.5fr 1fr' }}>

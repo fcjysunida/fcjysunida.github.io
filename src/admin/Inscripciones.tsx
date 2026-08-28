@@ -226,7 +226,7 @@ function Editor({
   return (
     <div role="dialog" aria-modal="true" aria-label="Editar inscripción"
          onClick={(e) => { if (e.target === e.currentTarget) alCerrar() }}
-         style={{ position: 'fixed', inset: 0, background: 'rgba(32,30,29,0.5)', zIndex: 40,
+         style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--md-inverse-surface) 55%, transparent)', zIndex: 40,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div className="tarjeta" style={{ padding: 30, width: '100%', maxWidth: 460,
                                         display: 'flex', flexDirection: 'column', gap: 18 }}>

@@ -72,30 +72,42 @@ export function Cargando({ texto = 'Cargando' }: { texto?: string }) {
 export function Aviso({ children, tono = 'error' }: { children: ReactNode; tono?: 'error' | 'nota' }) {
   if (!children) return null
   return (
-    <p
-      role={tono === 'error' ? 'alert' : undefined}
-      style={{
-        margin: '4px 0 0',
-        fontSize: 14,
-        color: tono === 'error' ? 'var(--rojo-oscuro)' : 'var(--tenue)',
-      }}
+    <div
+      className={tono === 'error' ? 'aviso' : 'aviso aviso-nota'}
+      role={tono === 'error' ? 'alert' : 'status'}
+      aria-live={tono === 'error' ? 'assertive' : 'polite'}
+      style={{ margin: '4px 0 16px' }}
     >
-      {children}
-    </p>
+      <span aria-hidden="true" style={{ fontWeight: 700 }}>
+        {tono === 'error' ? '!' : 'i'}
+      </span>
+      <span>{children}</span>
+    </div>
   )
 }
 
-export function Dato({ label, valor, nota }: { label: string; valor: ReactNode; nota?: ReactNode }) {
+export function Dato({ label, valor, nota, tono = 'neutro' }: {
+  label: string; valor: ReactNode; nota?: ReactNode
+  tono?: 'neutro' | 'primario' | 'ok' | 'alerta'
+}) {
+  const fondo = {
+    neutro:   'var(--md-surface-c-low)',
+    primario: 'var(--md-primary-container)',
+    ok:       'var(--md-tertiary-container)',
+    alerta:   'var(--md-error-container)',
+  }[tono]
+  const texto = {
+    neutro:   'var(--md-on-surface)',
+    primario: 'var(--md-on-primary-container)',
+    ok:       'var(--md-on-tertiary-container)',
+    alerta:   'var(--md-on-error-container)',
+  }[tono]
   return (
-    <div>
-      <div style={{ fontSize: 13, color: 'var(--tenue)' }}>{label}</div>
-      <div
-        className="numeral"
-        style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 46, lineHeight: 1.05, marginTop: 2 }}
-      >
-        {valor}
-      </div>
-      {nota && <div style={{ fontSize: 13, color: 'rgba(32,30,29,0.55)' }}>{nota}</div>}
+    <div style={{ background: fondo, color: texto, padding: '18px 20px',
+                  borderRadius: 'var(--forma-l)' }}>
+      <div style={{ fontSize: 13, fontWeight: 500, opacity: 0.85 }}>{label}</div>
+      <div className="numeral dato-cifra" style={{ marginTop: 4 }}>{valor}</div>
+      {nota && <div style={{ fontSize: 13, opacity: 0.75, marginTop: 2 }}>{nota}</div>}
     </div>
   )
 }
