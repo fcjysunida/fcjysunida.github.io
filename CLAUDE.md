@@ -90,6 +90,7 @@ ningún indicador. Los campos con `mapa: "nombre"` y `mapa: "cedula"` son impres
 | Pasantías | `/admin/pasantias` | Cumplimiento del requisito de egreso, plazos y convalidación |
 | Eventos de vinculación | `/admin/eventos` | Reuniones, visitas y ferias sin formato oficial 9 |
 | Normograma | `/admin/normas` | Normas de extensión y pasantías con su articulado |
+| Perfil | `/admin/perfil` | Datos de la cuenta y cambio de contraseña |
 | Correo | `/admin/ajustes` | Cola con tope diario; Resend |
 
 ## Tareas frecuentes
@@ -205,6 +206,27 @@ piden los artículos 19 y 20 del Reglamento de Proyección Social y Extensión U
 `normas` y `norma_articulos`. El articulado se transcribe **de la fuente publicada**. Seis de
 los PDF de la UNIDA son escaneos sin capa de texto: quedan marcados con `sin_texto` y se
 enlazan sin extracto. No se cita articulado que no se pudo leer.
+
+### Lectura asistida de documentos
+
+`/admin/proyectos` y la pestaña de informes admiten cargar el archivo que remitió la
+cátedra —Word, ODT o PDF— y precargar el formulario. Lo resuelve la función
+`leer-documento`:
+
+- El **PDF** va tal cual al modelo, que lo lee de forma nativa.
+- **Word y ODT** no los lee ningún modelo: la función les extrae el texto. Los dos son
+  un ZIP con XML adentro y Deno trae `DecompressionStream`, así que el lector de ZIP
+  está escrito a mano y no hay dependencias.
+- **No guarda nada.** Devuelve lo leído como propuesta, con el recuento de campos con
+  dato, la nómina detectada y la lista de lo que el modelo dice no haber encontrado.
+- Al modelo se le prohíbe completar: si un campo no está, va vacío y a `faltantes`.
+  Se le advierte además de las trampas del formato —filas de ejemplo, «N/A», recuentos
+  como «40 Alumnos» que no son personas—, que son las que hicieron fallar al importador
+  por reglas.
+- La nómina se carga por `proyecto_participantes_agregar()`, que la cruza con el padrón
+  como siempre. La lectura asistida no esquiva ninguna verificación.
+
+Un PDF escaneado sin capa de texto no sirve: necesita reconocimiento óptico previo.
 
 ### Retención
 ```
