@@ -59,6 +59,16 @@ indicadores, consentimiento, endurecimiento de permisos, claves y tareas.
 | `periodos_disponibles_incluye_proyectos` | El selector de período abarca desde 2021 |
 | `indicadores_incluyen_proyectos` | Los indicadores cuentan los proyectos, no solo las actividades |
 | `cerrar_cuentas_de_servicio_y_de_prueba` | Cierre de las cuentas que no son personas reales |
+| `catalogo_de_carreras_y_multiseleccion` | Catálogo de carreras; `proyectos.carreras` pasa a lista |
+| `normograma_de_extension_y_pasantias` | Tablas `normas` y `norma_articulos` |
+| `normograma_carga_inicial` | Doce normas con enlace y sumario |
+| `normograma_articulos` | Treinta y cuatro artículos transcritos de la fuente |
+| `modulo_de_pasantias` | Tabla `pasantias`, parámetros del reglamento y días hábiles |
+| `vista_de_cumplimiento_de_pasantia` | `pasantias_detalle` y `pasantias_personas` |
+| `funciones_de_pasantia` | `pasantia_guardar()` y convalidación por egreso |
+| `exploracion_de_pasantias` | `pasantias_resumen()` y `pasantias_nomina()` |
+| `modulo_de_eventos_de_vinculacion` | `eventos` y `evento_participantes` |
+| `funciones_de_eventos` | `evento_guardar()` y nómina verificada contra el padrón |
 
 ## Reglas
 

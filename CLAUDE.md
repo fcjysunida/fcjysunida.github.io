@@ -87,6 +87,9 @@ ningún indicador. Los campos con `mapa: "nombre"` y `mapa: "cedula"` son impres
 | Constancias | `/admin/certificados`, `/c/:codigo` | Emisión por lote y verificación pública |
 | Proyectos de extensión | `/admin/proyectos` | Formatos oficiales 9 y 10, exportación en Word |
 | Horas de extensión | `/admin/extension` | Horas por persona, meta de la carrera, acreditación histórica |
+| Pasantías | `/admin/pasantias` | Cumplimiento del requisito de egreso, plazos y convalidación |
+| Eventos de vinculación | `/admin/eventos` | Reuniones, visitas y ferias sin formato oficial 9 |
+| Normograma | `/admin/normas` | Normas de extensión y pasantías con su articulado |
 | Correo | `/admin/ajustes` | Cola con tope diario; Resend |
 
 ## Tareas frecuentes
@@ -137,6 +140,7 @@ preparados para completar a mano; el resto se calcula.
 npm run cli -- periodo:crear --codigo 2025-1 --desde 2025-01-01 --hasta 2025-07-31
 npm run cli -- padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1 --dry-run
 npm run cli -- padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1
+npm run cli -- padron:importar --carpeta "./Alumnos UNIDA"   # varios períodos de una vez
 ```
 Lee `.XLS` (BIFF2, el que exporta el sistema académico), `.xlsx` y `.csv`. Reimportar el
 mismo período actualiza en vez de duplicar: la clave es (período, cédula). No se importan
@@ -172,6 +176,35 @@ Se cuentan por separado dos cosas que no son lo mismo:
 A un egresado se le puede acreditar el saldo que le falte: el título prueba que cumplió el
 requisito. Eso **no** lo convierte en participante de ningún proyecto concreto — inscribirlo
 en uno afirmaría una asistencia que nadie registró y ensuciaría los conteos de beneficiarios.
+
+### Pasantías
+
+Requisito de egreso (art. 5 del Reglamento de Práctica y Pasantía). El módulo modela lo
+que el reglamento exige y controla los plazos en días hábiles:
+
+- **264 horas reloj** (art. 29), en `configuracion.pasantia_horas_meta`.
+- Obligatoria **desde el sexto semestre** (art. 7 inc. b).
+- Nota final = 40 % unidad receptora + 60 % Universidad, mínimo 70 % (art. 28).
+- Informe del estudiante a los **8 días hábiles** del cierre (art. 15); subsanación de
+  observaciones a los **8** (art. 16); informe de conformidad a los **30** (art. 27).
+- **Convalidación** para egresados (art. 35): el título prueba el cumplimiento. Se crea un
+  registro individual por persona con la constancia de en qué se funda, nunca un cumplimiento
+  silencioso.
+
+Los parámetros viven en `configuracion` por si cambia la malla; no están escritos en el código.
+
+### Eventos de vinculación
+
+Reuniones con empresas, visitas, ferias de empleo y firmas de convenio. Por su categoría no
+pasan por el formato oficial 9, pero sí llevan informe de actividad, nómina de participantes
+—verificada contra el padrón igual que en los proyectos— y certificación opcional. Es lo que
+piden los artículos 19 y 20 del Reglamento de Proyección Social y Extensión Universitaria.
+
+### Normograma
+
+`normas` y `norma_articulos`. El articulado se transcribe **de la fuente publicada**. Seis de
+los PDF de la UNIDA son escaneos sin capa de texto: quedan marcados con `sin_texto` y se
+enlazan sin extracto. No se cita articulado que no se pudo leer.
 
 ### Retención
 ```
