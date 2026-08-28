@@ -19,6 +19,9 @@ import Indicadores from './admin/Indicadores'
 import Calidad from './admin/Calidad'
 import Padron from './admin/Padron'
 import Extension from './admin/Extension'
+import Pasantias from './admin/Pasantias'
+import Eventos from './admin/Eventos'
+import Normas from './admin/Normas'
 import Certificados from './admin/Certificados'
 import Proyectos from './admin/Proyectos'
 import Proyecto from './admin/Proyecto'
@@ -63,6 +66,9 @@ export default function App() {
           <Route path="/admin/certificados" element={<Protegido><Certificados /></Protegido>} />
           <Route path="/admin/padron"       element={<Protegido><Padron /></Protegido>} />
           <Route path="/admin/extension"    element={<Protegido><Extension /></Protegido>} />
+          <Route path="/admin/pasantias"    element={<Protegido><Pasantias /></Protegido>} />
+          <Route path="/admin/eventos"      element={<Protegido><Eventos /></Protegido>} />
+          <Route path="/admin/normas"       element={<Protegido><Normas /></Protegido>} />
           <Route path="/admin/proyectos"    element={<Protegido><Proyectos /></Protegido>} />
           <Route path="/admin/proyectos/:id" element={<Protegido><Proyecto /></Protegido>} />
           <Route path="/admin/ajustes"      element={<Protegido><Ajustes /></Protegido>} />

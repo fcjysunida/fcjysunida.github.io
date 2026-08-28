@@ -45,6 +45,7 @@ const AYUDA = `
   Padrón académico
     periodo:crear --codigo 2025-1 --desde 2025-02-01 --hasta 2025-07-31
     padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1
+    padron:importar --carpeta "./Alumnos UNIDA"            # el período sale del nombre
                     [--condicion estudiante|egresado] [--dry-run]
                     [--col-nombre N --col-cedula N --col-matricula N]   # si no los detecta
     padron:resumen
@@ -311,6 +312,57 @@ async function main(): Promise<void> {
     }
 
     case 'padron:importar': {
+      // --carpeta importa todos los .XLS/.xlsx/.csv de un directorio y toma el
+      // período del nombre del archivo (2025-1.XLS → 2025-1). Un solo ingreso
+      // de credenciales para toda la tanda.
+      if (typeof args.carpeta === 'string') {
+        const dir = args.carpeta
+        const archivos = readdirSync(dir)
+          .filter((f) => /\.(xls|xlsx|csv)$/i.test(f) && !f.startsWith('~$'))
+          .sort()
+        if (archivos.length === 0) fatal('No encontré planillas en esa carpeta.')
+
+        const cond = (args.condicion as string) ?? 'estudiante'
+        const simulacion = args['dry-run'] === true
+        const db = simulacion ? null : await comoOperador()
+        let totalCargadas = 0
+
+        for (const f of archivos) {
+          const per = f.replace(/\.(xls|xlsx|csv)$/i, '').trim()
+          if (!/^\d{4}-\d$/.test(per)) {
+            console.log(`  ${f}: el nombre no es un período (2025-1.XLS), se omite.`)
+            continue
+          }
+          const { filas, leidas } = await leerPlanilla(`${dir}/${f}`, {},
+                                                       (args.hoja as string) ?? undefined)
+          console.log(`\n  ${per}: ${leidas} filas, ${filas.length} con nombre y documento.`)
+          if (simulacion || filas.length === 0) continue
+
+          for (let i = 0; i < filas.length; i += 400) {
+            const { data, error } = await db!.rpc('padron_importar', {
+              p_periodo: per, p_condicion: cond, p_filas: filas.slice(i, i + 400),
+            })
+            if (error) fatal(`${per}: ${error.message}`)
+            totalCargadas += Number((data as Record<string, number>).procesadas ?? 0)
+          }
+          console.log(`  ${per}: cargado.`)
+        }
+
+        if (simulacion) {
+          console.log('\n  Simulación: no se cargó nada. Quite --dry-run para importar.\n')
+          break
+        }
+        console.log(`\n  ${totalCargadas} registros cargados en ${archivos.length} períodos.`)
+        const { data: v } = await db!.rpc('padron_vincular_por_matricula')
+        const vv = v as Record<string, number>
+        console.log(`  Vinculación por matrícula: ${vv?.vinculadas ?? 0} completadas.`)
+        const { data: cruce } = await db!.rpc('recruzar_padron', { p_actividad: null })
+        const c = cruce as Record<string, number>
+        console.log(`  Recruce: ${c?.revisadas ?? 0} inscripciones revisadas, ` +
+                    `${c?.reclasificadas ?? 0} reclasificadas.\n`)
+        break
+      }
+
       const [archivo, periodo] = exigir(args, 'archivo', 'periodo')
       const condicion = (args.condicion as string) ?? 'estudiante'
       if (!['estudiante', 'egresado'].includes(condicion)) {

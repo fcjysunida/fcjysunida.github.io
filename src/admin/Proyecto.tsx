@@ -15,6 +15,8 @@ import {
   CLASIFICACIONES, ESTADOS_PROYECTO, RUBROS, FUENTES, CREDITOS, DESTINATARIOS,
 } from '../lib/proyecto'
 import { fechaCorta, hoyAsuncion } from '../lib/formato'
+import { listarCarreras } from '../data/panel'
+import type { Carrera } from '../data/panel'
 import { Cargando, Aviso } from '../ui/piezas'
 import { Bloque, Campo, Area, Lineas, Filas, Matriz, Casillas } from './piezas-proyecto'
 
@@ -24,6 +26,7 @@ export default function Proyecto() {
   const { id = '' } = useParams()
   const [p, setP] = useState<TProyecto | null>(null)
   const [periodos, setPeriodos] = useState<PeriodoAcademico[]>([])
+  const [carreras, setCarreras] = useState<Carrera[]>([])
   const [acts, setActs] = useState<Actividad[]>([])
   const [pest, setPest] = useState<Pestana>('propuesta')
   const [aviso, setAviso] = useState('')
@@ -34,6 +37,7 @@ export default function Proyecto() {
     traerProyecto(id).then(setP).catch((e: Error) => setError(e.message))
     listarPeriodos().then(setPeriodos).catch(() => setPeriodos([]))
     listarActividades().then(setActs).catch(() => setActs([]))
+    listarCarreras().then(setCarreras).catch(() => setCarreras([]))
   }, [id])
 
   const set = <K extends keyof TProyecto>(k: K, v: TProyecto[K]) => {
@@ -126,8 +130,25 @@ export default function Proyecto() {
                      onChange={(v) => set('lider', v)} />
               <Campo etiqueta="Tutor/a (docente de la cátedra o coordinador)"
                      valor={p.tutor ?? ''} onChange={(v) => set('tutor', v)} />
-              <Campo etiqueta="Carrera(s)" valor={p.carreras ?? ''}
-                     onChange={(v) => set('carreras', v)} />
+              <div className="field">
+                <label>Carrera(s) — se puede elegir más de una</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+                  {carreras.map((c) => (
+                    <label key={c.codigo}
+                           style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 14 }}>
+                      <input type="checkbox"
+                             checked={(p.carreras ?? []).includes(c.nombre)}
+                             onChange={() => {
+                               const actual = p.carreras ?? []
+                               set('carreras', actual.includes(c.nombre)
+                                 ? actual.filter((x) => x !== c.nombre)
+                                 : [...actual, c.nombre])
+                             }} />
+                      {c.nombre}
+                    </label>
+                  ))}
+                </div>
+              </div>
               <Campo etiqueta="Curso o cátedra" valor={p.curso ?? ''}
                      onChange={(v) => set('curso', v)} />
             </div>

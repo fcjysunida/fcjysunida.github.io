@@ -500,3 +500,107 @@ export const acreditarEgresados = (cohortes: string[], motivo: string, simulacio
                periodo_egreso: string; tenia: number; se_acreditan: number }[]
   }>('horas_extension_acreditar_egresados',
      { p_cohortes: cohortes, p_motivo: motivo, p_dry_run: simulacion })
+
+// ── Carreras ─────────────────────────────────────────────────────────────────
+
+export type Carrera = { codigo: string; nombre: string; orden: number; activa: boolean }
+
+export async function listarCarreras(): Promise<Carrera[]> {
+  const { data, error } = await supabase
+    .from('carreras').select('*').eq('activa', true).order('orden')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Carrera[]
+}
+
+// ── Normograma ───────────────────────────────────────────────────────────────
+
+export type Norma = {
+  codigo: string; orden: number; jerarquia: string; titulo: string
+  organo: string | null; anio: number | null; url: string | null
+  ambito: string[]; sumario: string | null; sin_texto: boolean; vigente: boolean
+}
+
+export type NormaArticulo = {
+  id: string; norma: string; orden: number; numero: string
+  epigrafe: string | null; texto: string; ambito: string[]
+}
+
+export async function listarNormas(): Promise<Norma[]> {
+  const { data, error } = await supabase.from('normas').select('*').order('orden')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Norma[]
+}
+
+export async function listarArticulos(): Promise<NormaArticulo[]> {
+  const { data, error } = await supabase
+    .from('norma_articulos').select('*').order('norma').order('orden')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as NormaArticulo[]
+}
+
+// ── Pasantías ────────────────────────────────────────────────────────────────
+
+export type ResumenPasantia = {
+  periodo: string; condicion: CondicionAcademica; personas: number
+  cumplen: number; sin_registro: number; en_curso: number
+  convalidadas: number; observadas: number
+}
+
+export type FilaPasantia = {
+  padron_id: string; pasantia_id: string | null; nombre: string
+  cedula_mascara: string | null; matricula: string | null; cohorte: string | null
+  carrera: string | null; condicion: CondicionAcademica; periodo: string
+  modalidad: string | null; estado: string | null; organizacion: string | null
+  con_convenio: boolean | null; horas: number; horas_faltantes: number
+  nota_final: number | null; ficha_recibida: boolean
+  informe_presentado_en: string | null; informe_fuera_de_plazo: boolean
+  subsanacion_vencida: boolean; conformidad_vencida: boolean; cumple: boolean
+}
+
+export const pasantiasResumen = () => rpc<ResumenPasantia[]>('pasantias_resumen')
+
+export const pasantiasNomina = (f: {
+  periodo?: string | null; condicion?: string | null
+  texto?: string | null; soloDeuda?: boolean; limite?: number
+}) => rpc<FilaPasantia[]>('pasantias_nomina', {
+  p_periodo: f.periodo || null, p_condicion: f.condicion || null,
+  p_texto: f.texto || null, p_solo_deuda: f.soloDeuda ?? false,
+  p_limite: f.limite ?? 300,
+})
+
+export const guardarPasantia = (datos: Record<string, unknown>) =>
+  rpc<{ ok: boolean; id: string; nuevo: boolean }>('pasantia_guardar', { p_datos: datos })
+
+export const convalidarEgresados = (cohortes: string[] | null, motivo: string, simulacion: boolean) =>
+  rpc<{
+    simulacion: boolean; personas: number
+    detalle: { nombre: string; matricula: string; cohorte: string; periodo_egreso: string }[]
+  }>('pasantia_convalidar_egresados',
+     { p_cohortes: cohortes, p_motivo: motivo, p_dry_run: simulacion })
+
+// ── Eventos de vinculación ───────────────────────────────────────────────────
+
+export type Evento = {
+  id: string; titulo: string; tipo: string; fecha: string; fecha_fin: string | null
+  lugar: string | null; organizacion: string | null; carreras: string[]
+  vinculo: string[]; resumen: string | null; informe: string | null
+  informe_en: string | null; beneficiarios: number | null; certifica: boolean
+  horas_reloj: number | null; docente_responsable: string | null
+  proyecto_id: string | null; actividad_id: string | null
+  participantes: number; estudiantes: number; docente: string | null
+  tiene_informe: boolean; creado_en: string
+}
+
+export async function listarEventos(): Promise<Evento[]> {
+  const { data, error } = await supabase
+    .from('eventos_resumen').select('*').order('fecha', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Evento[]
+}
+
+export const guardarEvento = (datos: Record<string, unknown>) =>
+  rpc<{ ok: boolean; id: string; nuevo: boolean }>('evento_guardar', { p_datos: datos })
+
+export const eventoParticipantes = (evento: string, filas: Record<string, unknown>[]) =>
+  rpc<{ ok: boolean; agregados: number; ya_estaban: number; omitidos: number }>(
+    'evento_participantes_agregar', { p_evento: evento, p_filas: filas })

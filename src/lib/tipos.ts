@@ -289,7 +289,7 @@ export interface Proyecto {
   estado: EstadoProyecto
   periodo_academico: string | null
   facultad: string
-  carreras: string | null
+  carreras: string[] | null
   curso: string | null
   localizacion: string | null
   otras_organizaciones: string | null
@@ -318,7 +318,7 @@ export interface ProyectoResumen {
   clasificacion: ClasificacionProyecto
   estado: EstadoProyecto
   periodo_academico: string | null
-  carreras: string | null
+  carreras: string[] | null
   lider: string | null
   fecha_inicio: string | null
   fecha_fin: string | null
