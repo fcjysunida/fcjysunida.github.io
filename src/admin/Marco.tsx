@@ -1,31 +1,16 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { etiquetaRol } from '../lib/campos'
 import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
 import { InterruptorTema } from '../lib/tema'
+import { GRUPOS, grupoDe } from './navegacion'
 
-const PESTANAS = [
-  { a: '/admin',                 label: 'Panel', exacta: true },
-  { a: '/admin/nueva',           label: 'Nueva actividad' },
-  { a: '/admin/inscripciones',   label: 'Inscripciones' },
-  { a: '/admin/asistencia',      label: 'Asistencia' },
-  { a: '/admin/indicadores',     label: 'Estadísticas' },
-  { a: '/admin/calidad',         label: 'Calidad' },
-  { a: '/admin/certificados',    label: 'Constancias' },
-  { a: '/admin/proyectos',       label: 'Proyectos' },
-  { a: '/admin/padron',          label: 'Padrón' },
-  { a: '/admin/extension',       label: 'Horas de extensión' },
-  { a: '/admin/pasantias',       label: 'Pasantías' },
-  { a: '/admin/eventos',         label: 'Eventos' },
-  { a: '/admin/normas',          label: 'Normograma' },
-  { a: '/admin/seguridad',       label: 'Protección de datos' },
-  { a: '/admin/usuarios',        label: 'Usuarios' },
-  { a: '/admin/ajustes',         label: 'Ajustes' },
-]
 
 export default function MarcoAdmin({ children }: { children: ReactNode }) {
   const { rol, nombre, salir } = useSesion()
+  const { pathname } = useLocation()
+  const grupoActivo = grupoDe(pathname)
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* WCAG 2.4.1: primer elemento enfocable, salta la navegación. */}
@@ -52,13 +37,36 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <div className="limite" style={{ paddingTop: 12, paddingBottom: 12 }}>
+        {/* Primer nivel: seis entradas. Cada grupo lleva a su primera pantalla. */}
+        <div className="limite" style={{ paddingTop: 12 }}>
           <nav className="fc-tabs" aria-label="Secciones del panel">
-            {PESTANAS.map((p) => (
-              <NavLink key={p.a} to={p.a} end={p.exacta} className="nav-tab">{p.label}</NavLink>
+            <NavLink to="/admin" end className="nav-tab">Panel</NavLink>
+            {GRUPOS.map((g) => (
+              <NavLink
+                key={g.id}
+                to={g.items[0]!.a}
+                className="nav-tab"
+                aria-current={grupoActivo?.id === g.id ? 'page' : undefined}
+              >
+                {g.label}
+              </NavLink>
             ))}
           </nav>
         </div>
+
+        {/* Segundo nivel: solo el del grupo en el que uno está. */}
+        {grupoActivo && (
+          <div className="limite" style={{ paddingTop: 8, paddingBottom: 12 }}>
+            <nav className="fc-tabs" aria-label={`Dentro de ${grupoActivo.label}`}>
+              {grupoActivo.items.map((it) => (
+                <NavLink key={it.a} to={it.a} className="nav-sub" title={it.nota}>
+                  {it.label}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        )}
+        {!grupoActivo && <div style={{ height: 12 }} />}
       </header>
 
       <main id="principal" className="limite" tabIndex={-1}
