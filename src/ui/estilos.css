@@ -312,8 +312,15 @@ select.input { cursor: pointer; }
 .ayuda { font-size: 13px; color: var(--md-on-surface-variant); display: block; margin-top: 5px; }
 .error { font-size: 14px; color: var(--md-error); }
 
+/* 24 px mínimos de objetivo táctil (WCAG 2.5.8). */
 input[type="checkbox"], input[type="radio"] {
-  accent-color: var(--md-primary); width: 20px; height: 20px; cursor: pointer;
+  accent-color: var(--md-primary); width: 24px; height: 24px;
+  min-width: 24px; min-height: 24px; cursor: pointer; margin: 0;
+}
+/* La etiqueta que envuelve una casilla también es zona de clic. */
+label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) {
+  min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
 }
 
 /* ── Superficies ────────────────────────────────────────────────────────── */
