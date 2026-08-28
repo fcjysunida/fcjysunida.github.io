@@ -14,6 +14,7 @@ import { leerPlanilla } from './planilla'
 import { propuestaDocx, informeDocx as proyectoInformeDocx } from './proyecto-docx'
 import { desplegar } from './desplegar'
 import { leerMemoria } from './memoria'
+import { textoDelPdf, bloques, cruzar } from './enriquecer'
 
 const [, , comando = '', ...resto] = process.argv
 const args = argumentos(resto)
@@ -54,6 +55,9 @@ const AYUDA = `
   Proyectos de extensión
     memoria:importar --archivo "Memoria_Extension_UNIDA_2021-2025.docx" [--dry-run]
                      # carga las actividades de la memoria como proyectos
+    memoria:enriquecer --archivo "Memoria 2025 FCJS UNIDA.pdf" --anio 2025
+                     [--umbral 0.5] [--dry-run]
+                     # cruza el texto completo del PDF con los proyectos cargados
     proyecto:listar
     proyecto:exportar --id <uuid> [--informe <uuid>] [--salida archivo.docx]
 
@@ -499,6 +503,55 @@ async function main(): Promise<void> {
       }
       console.log(`\n\n  ${altas} proyectos nuevos, ${actualizados} actualizados.`)
       console.log(`  La base tiene ahora ${total} proyectos.\n`)
+      break
+    }
+
+    case 'memoria:enriquecer': {
+      const [archivo, anio] = exigir(args, 'archivo', 'anio')
+      const umbral = Number(args.umbral ?? 0.5)
+      console.log(`\n  Leyendo ${archivo}…`)
+      const bl = bloques(textoDelPdf(archivo))
+      console.log(`  ${bl.length} bloques de texto reconocidos en el PDF.`)
+
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('proyectos_titulos', { p_anio: Number(anio) })
+      if (error) fatal(error.message)
+      const proyectos = (data ?? []) as { id: string; nombre: string; tiene_detalle: boolean }[]
+      console.log(`  ${proyectos.length} proyectos cargados de ${anio}` +
+                  ` (${proyectos.filter((p) => p.tiene_detalle).length} ya tienen detalle).`)
+
+      const cruces = cruzar(proyectos, bl, umbral)
+      console.log(`  ${cruces.length} emparejados con un puntaje de al menos ${umbral}.`)
+      console.log(`  ${cruces.filter((c) => c.participacion).length} traen detalles de participación.\n`)
+
+      const muestra = [...cruces].sort((a, b) => b.puntaje - a.puntaje)
+      for (const c of muestra.slice(0, 6)) {
+        console.log(`  [${c.puntaje}] ${c.nombre.slice(0, 52)}`)
+        console.log(`        ← ${c.titulo.slice(0, 62)}`)
+      }
+      if (muestra.length > 6) {
+        console.log(`        … y ${muestra.length - 6} más`)
+      }
+      const flojos = muestra.filter((c) => c.puntaje < 0.65)
+      if (flojos.length > 0) {
+        console.log(`\n  ${flojos.length} con puntaje bajo (menos de 0,65): revíselos en el panel.`)
+      }
+
+      if (args['dry-run'] === true) {
+        console.log('\n  Simulación: no se guardó nada. Quite --dry-run para aplicar.\n')
+        break
+      }
+      if (cruces.length === 0) fatal('No hubo coincidencias. Pruebe con --umbral 0.4')
+
+      const { data: r, error: e2 } = await db.rpc('proyectos_enriquecer', {
+        p_filas: cruces.map((c) => ({
+          proyecto_id: c.proyecto_id, detalle: c.detalle, participacion: c.participacion ?? null,
+        })),
+        p_fuente: archivo.split('/').pop() ?? archivo,
+      })
+      if (e2) fatal(e2.message)
+      const rr = r as Record<string, number>
+      console.log(`\n  ${rr.enriquecidos} proyectos enriquecidos con el texto de la memoria.\n`)
       break
     }
 
