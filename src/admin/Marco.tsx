@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { etiquetaRol } from '../lib/campos'
 import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
@@ -41,15 +41,18 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         <div className="limite" style={{ paddingTop: 12 }}>
           <nav className="fc-tabs" aria-label="Secciones del panel">
             <NavLink to="/admin" end className="nav-tab">Panel</NavLink>
+            {/* Link y no NavLink: NavLink calcula su propio aria-current contra la
+                ruta exacta y pisaría el del grupo. Acá lo marca el grupo activo,
+                que puede ser cualquiera de sus pantallas. */}
             {GRUPOS.map((g) => (
-              <NavLink
+              <Link
                 key={g.id}
                 to={g.items[0]!.a}
                 className="nav-tab"
                 aria-current={grupoActivo?.id === g.id ? 'page' : undefined}
               >
                 {g.label}
-              </NavLink>
+              </Link>
             ))}
           </nav>
         </div>
