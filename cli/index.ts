@@ -366,6 +366,9 @@ async function main(): Promise<void> {
                 p_periodo: per,
                 p_matriculas: filas.map((f) => f.matricula).filter(Boolean),
                 p_documentos: filas.map((f) => f.cedula).filter(Boolean),
+                // Solo se compara contra la misma condición: una nómina de
+                // alumnos no puede dar de baja a un egresado del período.
+                p_condicion: cond,
                 p_dry_run: false,
               })
               if (eRec) console.log(`  ${per}: reconciliación no aplicada — ${eRec.message}`)
