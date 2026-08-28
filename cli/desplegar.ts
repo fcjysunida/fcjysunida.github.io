@@ -84,11 +84,27 @@ function git(args: string[], token?: string, repo?: string): string {
   return execFileSync('git', args, { encoding: 'utf8', env, cwd: process.cwd() }).trim()
 }
 
+/** El token sale de .env o, si no está, de la sesión de `gh` si el usuario ya
+ *  hizo `gh auth login`. En ese caso no hay nada que copiar ni pegar. */
+function tomarToken(): string | undefined {
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN
+  try {
+    const t = execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    if (t) { console.log('  Usando la sesión de `gh auth login`.'); return t }
+  } catch { /* gh no está o no hay sesión */ }
+  return undefined
+}
+
 export async function desplegar(o: Opciones): Promise<void> {
-  const token = process.env.GITHUB_TOKEN
+  const token = tomarToken()
   if (!token) {
     fatal(
-      'Falta GITHUB_TOKEN en .env.\n\n' +
+      'No encontré credenciales de GitHub. Hay dos caminos, cualquiera sirve.\n\n' +
+      '  A) Sesión de gh (no hay que copiar ni pegar nada):\n' +
+      '       gh auth login        # elige GitHub.com → HTTPS → login con el navegador\n' +
+      '     Después vuelva a correr este comando y lo detecto solo.\n\n' +
+      '  B) Un token en .env:\n' +
+      '     Falta GITHUB_TOKEN en .env.\n\n' +
       '  Se crea en https://github.com/settings/personal-access-tokens/new\n' +
       '    · Repository access: el repositorio de destino (o «All repositories»)\n' +
       '    · Permisos:  Administration → Read and write   (crear el repo y activar Pages)\n' +
