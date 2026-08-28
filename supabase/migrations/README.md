@@ -33,6 +33,23 @@ indicadores, consentimiento, endurecimiento de permisos, claves y tareas.
 | `app_es_no_devuelve_null` | **Corrección de autorización**, ver abajo |
 | `certificados_fecha_es_y_plantilla` | Mes en español y elección correcta de plantilla |
 | `clave_servicio_en_vault` | `clave_servicio_guardar()` para la tarea de correo |
+| `gestion_de_usuarios` | Alta, cambio de rol y baja de cuentas del panel |
+| `padron_documentos_extranjeros` | El padrón acepta documentos que no son cédula paraguaya |
+| `padron_vinculo_por_matricula` | Cruce por matrícula cuando no hay documento |
+| `cruce_reconoce_egresados_por_matricula` | Egresados identificados por matrícula |
+| `proyectos_importar_memorias` | Carga de las memorias institucionales 2021-2025 |
+| `enriquecer_proyectos` | Texto completo de los PDF de memoria sobre cada proyecto |
+| `participantes_de_proyecto` | Nómina por proyecto y desglose por condición |
+| `participantes_altas_y_desglose` | `proyecto_participantes_agregar()` y verificación por período |
+| `registro_de_docentes` | Registro de docentes responsables, cátedra y correo |
+| `proyecto_desde_formato_oficial` | `proyecto_desde_formato()` para los formatos 9 y 10 |
+| `aviso_certificados_con_autorizacion` | El aviso de constancia exige autorización previa |
+| `docentes_normalizar_nombre` | Normaliza tratamientos al registrar un docente |
+| `participantes_sin_documento_no_duplican` | Deduplica por nombre cuando no hay documento |
+| `certificados_imprimibles` | `certificados_imprimibles()` para la impresión por lote |
+| `carga_manual_derecho_en_un_minuto` | Proyecto cuyo informe llegó en prosa, no en el formato oficial |
+| `carga_manual_workshop_chake_la_cita` | Alta de docentes del workshop de citación |
+| `enriquecer_chake_la_cita_con_formato_9` | Formato 9 del workshop sobre el registro de la memoria |
 
 ## Reglas
 
