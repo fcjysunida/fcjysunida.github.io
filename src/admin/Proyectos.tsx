@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { listarProyectos, guardarProyecto } from '../data/panel'
+import { listarProyectos, guardarProyecto, agregarParticipantes } from '../data/panel'
 import type { ProyectoResumen, ClasificacionProyecto } from '../lib/tipos'
 import { CLASIFICACIONES, etiquetaClasificacion, etiquetaEstadoProyecto } from '../lib/proyecto'
 import { fechaCorta, numero, hoyAsuncion } from '../lib/formato'
 import { usePermisos } from '../lib/sesion'
+import ImportarDocumento from './ImportarDocumento'
+import type { ProyectoLeido } from '../data/panel'
 import { Cargando, Aviso, Dato } from '../ui/piezas'
 
 const TODOS = '—todos—'
@@ -50,6 +52,49 @@ export default function Proyectos() {
     })
   }, [filas, anio, categoria, clasificacion, busca])
 
+  /** Crea el proyecto con lo que el documento traía y lo abre para revisar.
+   *  Se guarda como borrador: nada queda aprobado sin que alguien lo mire. */
+  async function crearDesde(d: ProyectoLeido) {
+    setError('')
+    try {
+      const anio = d.fecha_inicio ? Number(d.fecha_inicio.slice(0, 4))
+                                  : Number(hoyAsuncion().slice(0, 4))
+      const id = await guardarProyecto({
+        nombre: d.nombre || 'Proyecto sin título',
+        clasificacion: (d.clasificacion || 'cursos_extracurriculares') as ClasificacionProyecto,
+        estado: 'borrador',
+        carreras: d.carreras?.length ? d.carreras : undefined,
+        curso: d.curso || undefined,
+        localizacion: d.localizacion || undefined,
+        otras_organizaciones: d.otras_organizaciones || undefined,
+        lider: d.lider || undefined,
+        tutor: d.tutor || undefined,
+        entregable: d.entregable || undefined,
+        fecha_inicio: d.fecha_inicio || undefined,
+        fecha_fin: d.fecha_fin || undefined,
+        horas_reloj: d.horas_reloj ? Number(d.horas_reloj) : undefined,
+        anio,
+        fuente: 'Lectura asistida del documento remitido',
+        propuesta: {
+          introduccion: d.introduccion || undefined,
+          justificacion: d.justificacion || undefined,
+          objetivo_general: d.objetivo_general || undefined,
+          metodologia: d.metodologia || undefined,
+          detalle: d.detalle || undefined,
+        },
+      })
+      // La nómina se carga por la vía de siempre, que verifica contra el padrón.
+      const gente = (d.estudiantes ?? []).filter((e) => e.nombre?.trim())
+      if (gente.length > 0) {
+        await agregarParticipantes(id, gente.map((e) => ({
+          nombre: e.nombre, cedula: e.cedula, matricula: e.matricula,
+          carrera: e.carrera, tipo: 'estudiante',
+        })), 'documento remitido')
+      }
+      ir(`/admin/proyectos/${id}`)
+    } catch (e) { setError((e as Error).message) }
+  }
+
   async function crear() {
     try {
       const id = await guardarProyecto({
@@ -85,6 +130,18 @@ export default function Proyectos() {
         memorias 2021–2025 están cargadas como proyectos finalizados: sirven de historial y de
         base para redactar los informes que falten.
       </p>
+
+      {permisos.creaActividad && (
+        <div style={{ margin: '24px 0 0' }}>
+          <ImportarDocumento<ProyectoLeido>
+            tipo="proyecto"
+            onLeido={(d) => void crearDesde(d)}
+            titulo="Cargar un proyecto desde el documento remitido"
+            ayuda="Word, ODT o PDF. Se leen los campos del formato 9 y la nómina de
+                   estudiantes, y se crea el proyecto como borrador para que usted lo
+                   revise. La nómina se cruza con el padrón como siempre." />
+        </div>
+      )}
 
       <hr className="rule-strong" style={{ margin: '30px 0 28px' }} />
 

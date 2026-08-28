@@ -626,3 +626,64 @@ export async function listarCatedras(): Promise<string[]> {
   }
   return [...set].sort((a, b) => a.localeCompare(b, 'es'))
 }
+
+// ── Lectura asistida de documentos ───────────────────────────────────────────
+
+export type PersonaLeida = {
+  nombre: string; cedula: string; carrera: string; ciclo: string; matricula: string
+}
+
+export type ProyectoLeido = {
+  nombre: string; clasificacion: string; carreras: string[]; curso: string
+  localizacion: string; otras_organizaciones: string; lider: string; tutor: string
+  entregable: string; fecha_inicio: string; fecha_fin: string; horas_reloj: string
+  introduccion: string; justificacion: string; objetivo_general: string
+  metodologia: string; detalle: string
+  docentes: string[]; estudiantes: PersonaLeida[]; externos: string[]
+  faltantes: string[]
+}
+
+export type InformeLeido = {
+  nombre: string; fecha_informe: string; resumen: string; resultados: string
+  conclusiones: string
+  analisis: { fila: string; planteado: string; alcanzado: string }[]
+  beneficiarios: string; docentes: string[]; estudiantes: PersonaLeida[]
+  faltantes: string[]
+}
+
+/** Lee un proyecto o un informe desde Word, ODT o PDF y devuelve los campos del
+ *  formato oficial. No guarda nada: lo que vuelve es una propuesta para revisar. */
+export async function leerDocumento<T>(
+  archivo: File, tipo: 'proyecto' | 'informe',
+): Promise<{ datos: T; proveedor: string; modelo: string }> {
+  const { data: sesion } = await supabase.auth.getSession()
+  const token = sesion.session?.access_token
+  if (!token) throw new Error('La sesión expiró. Vuelva a entrar.')
+
+  const base64 = await new Promise<string>((resolver, rechazar) => {
+    const lector = new FileReader()
+    lector.onload = () => resolver(String(lector.result))
+    lector.onerror = () => rechazar(new Error('No pude leer el archivo.'))
+    lector.readAsDataURL(archivo)
+  })
+
+  const r = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/leer-documento`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        archivo: base64, mime: archivo.type, nombre: archivo.name, tipo,
+      }),
+    },
+  )
+  const cuerpo = await r.json().catch(() => ({}))
+  if (!r.ok || !cuerpo?.ok) {
+    throw new Error(cuerpo?.error ?? 'No pudimos leer el documento.')
+  }
+  return { datos: cuerpo.datos as T, proveedor: cuerpo.proveedor, modelo: cuerpo.modelo }
+}

@@ -16,6 +16,8 @@ import {
 } from '../lib/proyecto'
 import { fechaCorta, hoyAsuncion } from '../lib/formato'
 import { listarCarreras, listarCatedras } from '../data/panel'
+import type { InformeLeido } from '../data/panel'
+import ImportarDocumento from './ImportarDocumento'
 import type { Carrera } from '../data/panel'
 import { Cargando, Aviso, CampoSugerido } from '../ui/piezas'
 import { Bloque, Campo, Area, Lineas, Filas, Matriz, Casillas } from './piezas-proyecto'
@@ -664,6 +666,28 @@ function Informes({ proyecto }: { proyecto: TProyecto }) {
           Nuevo informe
         </button>
       </Bloque>
+
+      {/* El informe también puede venir ya escrito por la cátedra. */}
+      <div style={{ marginTop: 22 }}>
+        <ImportarDocumento<InformeLeido>
+          tipo="informe"
+          onLeido={(d) => setEdit({
+            id: '', proyecto_id: proyecto.id,
+            elaborado_por: d.docentes?.[0] ?? proyecto.lider ?? '',
+            aprobado_por: null,
+            fecha_informe: d.fecha_informe || hoyAsuncion(),
+            lugar_ejecucion: proyecto.localizacion,
+            beneficiarios: d.beneficiarios || null,
+            resumen: d.resumen || null,
+            metodologia: d.resultados || null,
+            conclusiones: d.conclusiones || null,
+            informe: d.analisis?.length ? { analisis: d.analisis } : {},
+            estado: 'borrador', creado_en: '',
+          })}
+          titulo="Cargar el informe desde el documento remitido"
+          ayuda="Word, ODT o PDF. Se leen los campos del formato 10 y se abre el editor
+                 con lo leído, sin guardar. Revise antes de confirmar." />
+      </div>
     </div>
   )
 }

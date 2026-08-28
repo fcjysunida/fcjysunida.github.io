@@ -578,6 +578,39 @@ label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) {
 /* Señala un cambio recién guardado, una sola vez. */
 .pulsa { animation: pulso 900ms ease-out 1; }
 
+
+/* ── Cuenta ─────────────────────────────────────────────────────────────── */
+/* En la cabecera solo va el avatar. El nombre, el rol y las acciones estaban
+   ocupando media barra y competían con la navegación. */
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border: none; border-radius: var(--forma-completa);
+  background: var(--md-primary-container); color: var(--md-on-primary-container);
+  font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+  cursor: pointer; transition: box-shadow var(--mov-rapido), transform var(--mov-elastico);
+}
+.avatar:hover { box-shadow: var(--elev-2); }
+.avatar:active { transform: scale(0.95); }
+
+.menu-cuenta {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 50;
+  min-width: 268px; padding: 14px;
+  background: var(--md-surface-c-low);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--forma-l); box-shadow: var(--elev-3);
+  animation: desplegar var(--mov-normal) both;
+}
+.menu-cuenta-ficha { padding: 2px 8px 0; }
+.menu-cuenta-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  min-height: 44px; padding: 0 10px;
+  border: none; background: transparent; border-radius: var(--forma-s);
+  color: var(--md-on-surface); font-family: var(--sans); font-size: 14px;
+  font-weight: 500; text-align: left; text-decoration: none; cursor: pointer;
+  transition: background var(--mov-rapido);
+}
+.menu-cuenta-item:hover { background: var(--md-surface-c-high); }
+
 /* ── Constancias: se imprimen, no llevan tema ───────────────────────────── */
 .hoja {
   width: 297mm; height: 210mm; position: relative; overflow: hidden;

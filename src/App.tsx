@@ -22,6 +22,7 @@ import Extension from './admin/Extension'
 import Pasantias from './admin/Pasantias'
 import Eventos from './admin/Eventos'
 import Normas from './admin/Normas'
+import Perfil from './admin/Perfil'
 import { ProveedorTema } from './lib/tema'
 import Certificados from './admin/Certificados'
 import Proyectos from './admin/Proyectos'
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/admin/pasantias"    element={<Protegido><Pasantias /></Protegido>} />
           <Route path="/admin/eventos"      element={<Protegido><Eventos /></Protegido>} />
           <Route path="/admin/normas"       element={<Protegido><Normas /></Protegido>} />
+          <Route path="/admin/perfil"       element={<Protegido><Perfil /></Protegido>} />
           <Route path="/admin/proyectos"    element={<Protegido><Proyectos /></Protegido>} />
           <Route path="/admin/proyectos/:id" element={<Protegido><Proyecto /></Protegido>} />
           <Route path="/admin/ajustes"      element={<Protegido><Ajustes /></Protegido>} />

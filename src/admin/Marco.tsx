@@ -1,16 +1,14 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { useSesion } from '../lib/sesion'
-import { etiquetaRol } from '../lib/campos'
 import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
 import { InterruptorTema } from '../lib/tema'
 import { GRUPOS, grupoDe } from './navegacion'
 import { Icono } from '../ui/iconos'
 import MenuMovil from './MenuMovil'
+import MenuUsuario from './MenuUsuario'
 
 
 export default function MarcoAdmin({ children }: { children: ReactNode }) {
-  const { rol, nombre, salir } = useSesion()
   const { pathname } = useLocation()
   const grupoActivo = grupoDe(pathname)
   return (
@@ -24,13 +22,9 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
           <img className="logo-institucional" src="/assets/logo-fcjys.svg" alt={FACULTAD}
                style={{ height: 34 }} />
           <div style={{ flex: 1, minWidth: 80 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <MenuMovil />
-            <InterruptorTema />
-            <span className="tenue" style={{ fontSize: 13 }}>
-              {nombre}{rol ? ` — ${etiquetaRol(rol)}` : ' — sin rol asignado'}
-            </span>
-            <button className="btn btn-secondary" onClick={() => void salir()}>Salir</button>
+            <MenuUsuario />
           </div>
         </div>
 
@@ -86,11 +80,18 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
 
       <footer style={{ borderTop: '1px solid var(--md-outline-variant)',
                        background: 'var(--md-surface-c-low)' }}>
-        <div className="limite" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap',
-                                         gap: 18, justifyContent: 'space-between',
-                                         fontSize: 13, color: 'var(--md-on-surface-variant)' }}>
-          <span>{FACULTAD}</span>
-          <span>Responsable del tratamiento: {RESPONSABLE} — {CORREO}</span>
+        <div className="limite" style={{ padding: '22px 24px', display: 'flex',
+                                         flexWrap: 'wrap', gap: 18, alignItems: 'center',
+                                         justifyContent: 'space-between', fontSize: 13,
+                                         color: 'var(--md-on-surface-variant)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span>{FACULTAD}</span>
+            <span>Responsable del tratamiento: {RESPONSABLE} — {CORREO}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="tipo-nota">Apariencia</span>
+            <InterruptorTema />
+          </div>
         </div>
       </footer>
     </div>

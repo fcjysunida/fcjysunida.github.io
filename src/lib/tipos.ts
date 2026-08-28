@@ -279,6 +279,14 @@ export interface Propuesta {
   presupuesto?: Record<string, Record<string, string>>
   creditos?: Record<string, Record<string, boolean>>
   anexos?: string[]
+  /** Texto corrido de alcance, resultados y metas. Lo usan los proyectos que
+   *  vienen de las memorias y de la lectura asistida, donde no hay campos
+   *  separados sino un solo bloque narrativo. */
+  detalle?: string
+  /** Cómo participó la gente, cuando el documento no trae nómina nominada. */
+  participacion?: string
+  /** De qué correo o documento salió el registro. */
+  fuente_correo?: string
 }
 
 export interface Proyecto {
