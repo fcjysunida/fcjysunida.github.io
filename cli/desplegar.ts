@@ -175,9 +175,11 @@ export async function desplegar(o: Opciones): Promise<void> {
     ? '  Despliegue disparado ✓'
     : '  El despliegue arrancará solo con el push.')
 
-  const sitio = duenio.toLowerCase() === `${nombre}`.toLowerCase()
-    ? `https://${duenio}.github.io`
-    : `https://${duenio}.github.io/${nombre}`
+  // Un repositorio llamado «<dueño>.github.io» se sirve en la raíz del dominio;
+  // cualquier otro cuelga de /<nombre>/.
+  const sitio = nombre.toLowerCase() === `${duenio.toLowerCase()}.github.io`
+    ? `https://${duenio.toLowerCase()}.github.io`
+    : `https://${duenio.toLowerCase()}.github.io/${nombre}`
   console.log(`\n  Sitio:      ${sitio}`)
   console.log(`  Formulario: ${sitio}/f/<token>`)
   console.log(`  Asistencia: ${sitio}/a/<token>`)
