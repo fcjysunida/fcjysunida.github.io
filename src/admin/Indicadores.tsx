@@ -45,7 +45,7 @@ export default function Indicadores() {
           <div className="eyebrow">
             Informe mensual de Extensión y Vinculación — Docente de Tiempo Completo
           </div>
-          <h1 style={{ fontSize: 36, lineHeight: 1.1, marginTop: 8, textTransform: 'capitalize' }}>
+          <h1 className="tipo-display" style={{ marginTop: 8, textTransform: 'capitalize' }}>
             {mesLargo(mes)}
           </h1>
         </div>
@@ -79,7 +79,7 @@ export default function Indicadores() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>
             {ind.bloques.map((b) => (
               <div key={b.n}>
-                <h2 style={{ fontSize: 25 }}>{b.n}. {b.titulo}</h2>
+                <h2 className="tipo-titulo">{b.n}. {b.titulo}</h2>
                 <div className="fc-scroll" style={{ marginTop: 10 }}>
                   <table className="table" style={{ minWidth: 640 }}>
                     <thead>
@@ -94,7 +94,7 @@ export default function Indicadores() {
                         <tr key={it.label}>
                           <td>{it.label}</td>
                           <td className="numeral" style={{ textAlign: 'right',
-                                                           fontFamily: 'var(--serif)', fontSize: 18 }}>
+                                                           fontFamily: 'var(--serif)', fontSize: 19 }}>
                             {it.valor}
                           </td>
                           <td style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{it.unidad}</td>

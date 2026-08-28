@@ -79,7 +79,7 @@ export default function Formulario() {
     return (
       <Marco>
         <div className="tarjeta" style={{ padding: '34px 32px' }}>
-          <h1 style={{ fontSize: 28 }}>Este formulario no está disponible</h1>
+          <h1 style={{ fontSize: 26 }}>Este formulario no está disponible</h1>
           <p className="tenue" style={{ marginTop: 12 }}>
             El enlace puede haber sido regenerado o la inscripción ya fue cerrada.
             Consulte a la Coordinación de Extensión en <a href={`mailto:${CORREO}`}>{CORREO}</a>.
@@ -105,7 +105,7 @@ export default function Formulario() {
         </div>
         <div style={{ padding: '34px 32px 38px' }}>
           <div className="eyebrow">{etiquetaTipo(act.tipo)}</div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.14, marginTop: 8 }}>{act.titulo}</h1>
+          <h1 className="tipo-display" style={{ marginTop: 8 }}>{act.titulo}</h1>
           {act.descripcion && (
             <p style={{ color: 'var(--tenue-2)', margin: '16px 0 0' }}>{act.descripcion}</p>
           )}
@@ -158,7 +158,7 @@ export default function Formulario() {
               ))}
 
               <div style={{ borderTop: '2px solid var(--regla-fuerte)', paddingTop: 22 }}>
-                <h2 style={{ fontSize: 23 }}>Consentimiento informado</h2>
+                <h2 className="tipo-titulo">Consentimiento informado</h2>
                 <p style={{ fontSize: 14, color: 'var(--tenue-2)', margin: '12px 0 0' }}>
                   {FACULTAD}, con domicilio en Asunción. Responsable del tratamiento:{' '}
                   {RESPONSABLE} — <a href={`mailto:${CORREO}`}>{CORREO}</a>.

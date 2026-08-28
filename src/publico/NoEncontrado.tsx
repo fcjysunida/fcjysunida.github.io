@@ -6,7 +6,7 @@ export default function NoEncontrado() {
   return (
     <Marco ancho={560}>
       <div className="eyebrow">Página no encontrada</div>
-      <h1 style={{ fontSize: 32, marginTop: 8 }}>Esa dirección no corresponde a nada</h1>
+      <h1 className="tipo-display">Esa dirección no corresponde a nada</h1>
       <p style={{ color: 'var(--tenue-2)', marginTop: 14 }}>
         Los enlaces de inscripción tienen la forma <code>/f/…</code> y los de asistencia,{' '}
         <code>/a/…</code>. Si el suyo dejó de funcionar puede haber sido regenerado: pida el

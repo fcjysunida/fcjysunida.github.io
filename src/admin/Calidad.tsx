@@ -40,7 +40,7 @@ export default function Calidad() {
                     gap: 24, flexWrap: 'wrap' }}>
         <div style={{ maxWidth: '44ch' }}>
           <div className="eyebrow">Calidad percibida — ISO 10004:2018 y ISO 9001:2015 § 9.1.2</div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.15, marginTop: 6 }}>{actividad?.titulo ?? '—'}</h1>
+          <h1 className="tipo-display">{actividad?.titulo ?? '—'}</h1>
         </div>
         <Selector acts={acts} id={id} elegir={elegir} />
       </div>
@@ -69,7 +69,7 @@ export default function Calidad() {
                      : 'sobre las asistencias registradas'} />
           </div>
 
-          <h2 style={{ fontSize: 25 }}>Por dimensión</h2>
+          <h2 className="tipo-titulo">Por dimensión</h2>
           <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 18 }}>
             {DIMENSIONES.map((d) => {
               const v = s[d.clave] as number | null
@@ -78,7 +78,7 @@ export default function Calidad() {
                   <div style={{ display: 'flex', justifyContent: 'space-between',
                                 alignItems: 'baseline', gap: 16 }}>
                     <span style={{ fontSize: 14 }}>{d.rotulo}</span>
-                    <span className="numeral" style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>
+                    <span className="numeral" style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
                       {v ?? '—'}
                     </span>
                   </div>
@@ -91,7 +91,7 @@ export default function Calidad() {
           </div>
 
           <hr className="rule-strong" style={{ margin: '38px 0 20px' }} />
-          <h2 style={{ fontSize: 25 }}>Comentarios</h2>
+          <h2 className="tipo-titulo">Comentarios</h2>
           <p style={{ fontSize: 14, color: 'var(--tenue-2)', maxWidth: '70ch', marginTop: 8 }}>
             Se muestran sin identidad y sin orden cronológico, para que no puedan reconstruirse
             a partir del momento del registro. Son insumo de mejora, no traza de personas.
@@ -102,7 +102,7 @@ export default function Calidad() {
             <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column' }}>
               {comentarios.map((c, i) => (
                 <p key={i} style={{ borderTop: '1px solid var(--regla)', padding: '16px 0',
-                                    margin: 0, fontFamily: 'var(--serif)', fontSize: 17 }}>
+                                    margin: 0, fontFamily: 'var(--serif)', fontSize: 16 }}>
                   «{c}»
                 </p>
               ))}

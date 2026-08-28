@@ -39,7 +39,7 @@ export default function Privacidad() {
       <div className="eyebrow">
         {c ? `Texto vigente — versión ${c.version}` : 'Política de tratamiento de datos'}
       </div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>
         Cláusula de consentimiento y aviso de privacidad
       </h1>
       <p style={{ color: 'var(--tenue-2)', margin: '14px 0 0' }}>
@@ -51,7 +51,7 @@ export default function Privacidad() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
         {CLAUSULAS.map((cl) => (
           <div key={cl.titulo}>
-            <h2 style={{ fontSize: 21 }}>{cl.titulo}</h2>
+            <h2 className="tipo-titulo">{cl.titulo}</h2>
             <p style={{ color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>{cl.texto}</p>
             <div style={{ fontSize: 13, color: 'var(--tenue)', marginTop: 6, fontStyle: 'italic' }}>
               {cl.base}

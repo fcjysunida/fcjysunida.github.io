@@ -42,7 +42,7 @@ export function Barras({ titulo, datos, unidad = '' }: {
         {datos.map((d, i) => (
           <div key={d.etiqueta}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12,
-                          fontSize: 13.5, marginBottom: 5 }}>
+                          fontSize: 13, marginBottom: 5 }}>
               <span>{d.etiqueta}</span>
               <span className="numeral" style={{ fontWeight: 600 }}>
                 {d.valor}{unidad}
@@ -146,7 +146,7 @@ export function Anillo({ titulo, valor, total, etiqueta }: {
           {valor} de {total}
         </div>
         {etiqueta && (
-          <div className="tenue" style={{ fontSize: 12.5, marginTop: 4, maxWidth: '28ch' }}>
+          <div className="tenue" style={{ fontSize: 12, marginTop: 4, maxWidth: '28ch' }}>
             {etiqueta}
           </div>
         )}

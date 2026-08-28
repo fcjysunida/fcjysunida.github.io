@@ -66,7 +66,7 @@ export default function Constructor() {
   return (
     <div>
       <div className="eyebrow">Constructor de formularios</div>
-      <h1 style={{ fontSize: 38, lineHeight: 1.12, marginTop: 8, maxWidth: '30ch' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8, maxWidth: '30ch' }}>
         Nueva actividad y su formulario de inscripción
       </h1>
       <p style={{ maxWidth: '66ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
@@ -83,7 +83,7 @@ export default function Constructor() {
           <div className="field">
             <label htmlFor="titulo">Título de la actividad</label>
             <input id="titulo" className="input input-linea"
-                   style={{ fontFamily: 'var(--serif)', fontSize: 20, minHeight: 44 }}
+                   style={{ fontFamily: 'var(--serif)', fontSize: 19, minHeight: 44 }}
                    value={b.titulo} onChange={(e) => set('titulo', e.target.value)}
                    placeholder="Taller de seguridad digital" />
           </div>
@@ -148,7 +148,7 @@ export default function Constructor() {
             <hr className="rule" style={{ marginBottom: 20 }} />
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
                           gap: 16, flexWrap: 'wrap' }}>
-              <h2 style={{ fontSize: 24 }}>Campos del formulario</h2>
+              <h2 className="tipo-titulo">Campos del formulario</h2>
               <span style={{ fontSize: 13, color: 'var(--md-on-surface-variant)' }}>{resumen}</span>
             </div>
 
@@ -167,7 +167,7 @@ export default function Constructor() {
           {/* ── Portada ────────────────────────────────────────────────── */}
           <div>
             <hr className="rule" style={{ marginBottom: 20 }} />
-            <h2 style={{ fontSize: 24 }}>Portada</h2>
+            <h2 className="tipo-titulo">Portada</h2>
             <p style={{ fontSize: 14, color: 'var(--tenue-2)', margin: '8px 0 16px' }}>
               Imágenes de repositorios libres, en blanco y negro por norma de identidad.
             </p>
@@ -413,7 +413,7 @@ function Publicada({ enlaces, alReiniciar }: { enlaces: Enlaces; alReiniciar: ()
   return (
     <div style={{ maxWidth: 760 }}>
       <div className="eyebrow">Formulario publicado</div>
-      <h1 style={{ fontSize: 34, lineHeight: 1.12, marginTop: 8 }}>{enlaces.titulo}</h1>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>{enlaces.titulo}</h1>
       <hr className="rule-strong" style={{ margin: '28px 0' }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
@@ -484,7 +484,7 @@ function Enlace({
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
                     marginTop: 8 }}>
         <span className="chip chip-primario">Con vista previa</span>
-        <span className="tenue" style={{ fontSize: 12.5 }}>
+        <span className="tenue" style={{ fontSize: 12 }}>
           para WhatsApp, correo y redes
         </span>
         <button className="btn btn-ghost" style={{ fontSize: 13 }}

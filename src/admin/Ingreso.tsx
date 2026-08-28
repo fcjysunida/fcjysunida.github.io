@@ -71,7 +71,7 @@ export default function Ingreso({ sinRol = false }: { sinRol?: boolean }) {
   return (
     <Pantalla>
       <div className="eyebrow">Panel de gestión</div>
-      <h1 style={{ fontSize: 30, lineHeight: 1.14, marginTop: 8 }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>
         {modo === 'entrar' ? 'Inscripciones y asistencia' : 'Crear una cuenta'}
       </h1>
       <p className="tenue" style={{ fontSize: 14, marginTop: 10 }}>

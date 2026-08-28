@@ -96,33 +96,33 @@ export default function Panel() {
                     gap: 24, flexWrap: 'wrap' }}>
         <div style={{ maxWidth: '46ch' }}>
           <div className="eyebrow">Coordinación de Extensión y Vinculación</div>
-          <h1 style={{ fontSize: 42, lineHeight: 1.08, marginTop: 8, textTransform: 'capitalize' }}>
+          <h1 className="tipo-display" style={{ marginTop: 8, textTransform: 'capitalize' }}>
             {mesLargo(periodo)}
           </h1>
         </div>
         {permisos.creaActividad && (
           <button className="fab" onClick={() => ir('/admin/nueva')}>
-            <span aria-hidden="true" style={{ fontSize: 20, lineHeight: 1 }}>+</span>
+            <span aria-hidden="true" style={{ fontSize: 19, lineHeight: 1 }}>+</span>
             Nueva actividad
           </button>
         )}
       </div>
 
       {/* ── Atajos ────────────────────────────────────────────────────── */}
-      <nav aria-label="Accesos directos"
+      <nav aria-label="Accesos directos" className="entra-lista"
            style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '26px 0 34px' }}>
         {ATAJOS.map((x) => (
           <Link key={x.a} to={x.a} className="tarjeta"
                 style={{ display: 'block', padding: '12px 18px', textDecoration: 'none',
                          color: 'var(--md-on-surface)', minWidth: 150 }}>
-            <div style={{ fontWeight: 600, fontSize: 14.5 }}>{x.label}</div>
-            <div className="tenue" style={{ fontSize: 12.5 }}>{x.nota}</div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>{x.label}</div>
+            <div className="tenue" style={{ fontSize: 12 }}>{x.nota}</div>
           </Link>
         ))}
       </nav>
 
       {/* ── Cifras del mes ────────────────────────────────────────────── */}
-      <div className="fc-grid" style={{ marginBottom: 30 }}>
+      <div className="fc-grid entra-lista" style={{ marginBottom: 30 }}>
         {kpis.map((k, i) => (
           <Dato key={k.label} label={k.label} valor={numero(k.value)} nota={k.note}
                 tono={i === 0 ? 'primario' : 'neutro'} />
@@ -132,8 +132,8 @@ export default function Panel() {
       {/* ── Visualizaciones ───────────────────────────────────────────── */}
       <div className="fc-2" style={{ marginBottom: 36 }}>
         <section className="tarjeta" style={{ padding: '22px 24px' }}>
-          <h2 style={{ fontSize: 19 }}>Actividades y proyectos por año</h2>
-          <p className="tenue" style={{ fontSize: 13.5, margin: '4px 0 18px' }}>
+          <h2 className="tipo-titulo">Actividades y proyectos por año</h2>
+          <p className="tenue" style={{ fontSize: 13, margin: '4px 0 18px' }}>
             Memorias institucionales, formatos oficiales y lo registrado en la plataforma.
           </p>
           {serie.length === 0
@@ -142,8 +142,8 @@ export default function Panel() {
         </section>
 
         <section className="tarjeta" style={{ padding: '22px 24px' }}>
-          <h2 style={{ fontSize: 19 }}>Requisitos de egreso</h2>
-          <p className="tenue" style={{ fontSize: 13.5, margin: '4px 0 18px' }}>
+          <h2 className="tipo-titulo">Requisitos de egreso</h2>
+          <p className="tenue" style={{ fontSize: 13, margin: '4px 0 18px' }}>
             Cuántas personas del padrón los tienen cumplidos.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -157,8 +157,8 @@ export default function Panel() {
       </div>
 
       <section className="tarjeta" style={{ padding: '22px 24px', marginBottom: 36 }}>
-        <h2 style={{ fontSize: 19 }}>Origen de las horas de extensión</h2>
-        <p className="tenue" style={{ fontSize: 13.5, margin: '4px 0 18px' }}>
+        <h2 className="tipo-titulo">Origen de las horas de extensión</h2>
+        <p className="tenue" style={{ fontSize: 13, margin: '4px 0 18px' }}>
           Las respaldadas tienen asistencia registrada o nómina de proyecto; las históricas
           se acreditaron a mano y no tienen respaldo en la plataforma.
         </p>
@@ -171,7 +171,7 @@ export default function Panel() {
       </section>
 
       {/* ── Actividades ───────────────────────────────────────────────── */}
-      <h2 style={{ fontSize: 19, marginBottom: 12 }}>Actividades</h2>
+      <h2 className="tipo-titulo" style={{ marginBottom: 12 }}>Actividades</h2>
       {acts.length === 0 ? (
         <p className="tenue">
           Todavía no hay actividades.{' '}

@@ -124,8 +124,8 @@ export default function Extension() {
   return (
     <div>
       <div className="eyebrow">Extensión Universitaria</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Horas por estudiante</h1>
-      <p style={{ maxWidth: '78ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Horas por estudiante</h1>
+      <p className="entradilla">
         Cada persona del padrón debe acumular la meta de horas a lo largo de la carrera.
         Se cuentan por separado las horas <strong>respaldadas</strong> —asistencia registrada
         en la plataforma o nómina de un proyecto— y las <strong>históricas</strong>, acreditadas
@@ -149,7 +149,7 @@ export default function Extension() {
       {/* ── Acreditación por egreso ───────────────────────────────────── */}
       {permisos.creaActividad && (
         <div className="tarjeta" style={{ padding: 20, marginBottom: 32 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+          <div className="tipo-titulo">
             Acreditación por egreso
           </div>
           <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '8px 0 14px', fontSize: 14 }}>
@@ -200,7 +200,7 @@ export default function Extension() {
       )}
 
       {/* ── Conteo por período ────────────────────────────────────────── */}
-      <div style={{ fontFamily: 'var(--serif)', fontSize: 19, marginBottom: 12 }}>
+      <div className="tipo-titulo" style={{ marginBottom: 12 }}>
         Conteo por período
       </div>
       <div className="fc-scroll" style={{ marginBottom: 34 }}>
@@ -231,7 +231,7 @@ export default function Extension() {
       {/* ── Nómina ────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
                     gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+        <div className="tipo-titulo">
           Nómina
           {filas && (
             <span className="tenue" style={{ fontSize: 14, fontFamily: 'var(--sans)' }}>
@@ -317,7 +317,7 @@ export default function Extension() {
       {/* ── Alta manual ───────────────────────────────────────────────── */}
       {abierta && (
         <div className="tarjeta" style={{ padding: 20, marginTop: 26, maxWidth: 620 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+          <div className="tipo-titulo">
             Sumar horas a {abierta.nombre}
           </div>
           <p style={{ color: 'var(--tenue-2)', margin: '8px 0 16px', fontSize: 14 }}>

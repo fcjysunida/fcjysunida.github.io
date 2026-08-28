@@ -59,7 +59,7 @@ export default function Seguridad() {
   return (
     <div>
       <div className="eyebrow">Gobierno de datos</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8, maxWidth: '30ch' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8, maxWidth: '30ch' }}>
         Protección de datos y seguridad de la información
       </h1>
       <p style={{ maxWidth: '68ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
@@ -74,7 +74,7 @@ export default function Seguridad() {
         {CONTROLES.map((c) => (
           <div key={c.titulo} style={{ borderTop: '1px solid var(--regla)', paddingTop: 16 }}>
             <div style={{ fontSize: 13, color: 'var(--rojo-oscuro)' }}>{c.nivel}</div>
-            <h2 style={{ fontSize: 20, marginTop: 4 }}>{c.titulo}</h2>
+            <h2 className="tipo-titulo" style={{ marginTop: 4 }}>{c.titulo}</h2>
             <p style={{ fontSize: 14, color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>{c.texto}</p>
           </div>
         ))}
@@ -84,7 +84,7 @@ export default function Seguridad() {
       {permisos.configura && (
         <>
           <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-          <h2 style={{ fontSize: 25 }}>Aplicación de la retención</h2>
+          <h2 className="tipo-titulo">Aplicación de la retención</h2>
           <p style={{ fontSize: 14, color: 'var(--tenue-2)', maxWidth: '70ch', marginTop: 8 }}>
             Alcanza a las inscripciones de actividades cerradas o finalizadas hace más de{' '}
             {RETENCION_MESES} meses. La simulación no modifica nada; la aplicación es
@@ -111,7 +111,7 @@ export default function Seguridad() {
 
       {/* ── Solicitudes de derechos ───────────────────────────────────── */}
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-      <h2 style={{ fontSize: 25 }}>Solicitudes de derechos</h2>
+      <h2 className="tipo-titulo">Solicitudes de derechos</h2>
       {solicitudes.length === 0 ? (
         <p className="tenue" style={{ marginTop: 12 }}>
           Sin solicitudes pendientes. Las que lleguen por <code>/derechos</code> aparecen acá con
@@ -144,7 +144,7 @@ export default function Seguridad() {
 
       {/* ── Auditoría ─────────────────────────────────────────────────── */}
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-      <h2 style={{ fontSize: 25 }}>Registro de auditoría</h2>
+      <h2 className="tipo-titulo">Registro de auditoría</h2>
       {!permisos.veAuditoria ? (
         <p className="tenue" style={{ marginTop: 12 }}>
           El registro de auditoría lo consultan la Dirección y el rol de auditoría.

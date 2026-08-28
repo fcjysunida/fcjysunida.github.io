@@ -6,6 +6,7 @@ import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
 import { InterruptorTema } from '../lib/tema'
 import { GRUPOS, grupoDe } from './navegacion'
 import { Icono } from '../ui/iconos'
+import MenuMovil from './MenuMovil'
 
 
 export default function MarcoAdmin({ children }: { children: ReactNode }) {
@@ -24,6 +25,7 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
                style={{ height: 34 }} />
           <div style={{ flex: 1, minWidth: 80 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <MenuMovil />
             <InterruptorTema />
             <span className="tenue" style={{ fontSize: 13 }}>
               {nombre}{rol ? ` — ${etiquetaRol(rol)}` : ' — sin rol asignado'}
@@ -33,13 +35,14 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         </div>
 
         <div className="limite" style={{ paddingTop: 14 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 21, letterSpacing: '-0.015em' }}>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: 22, letterSpacing: '-0.015em' }}>
             Inscripciones y asistencia
           </div>
         </div>
 
-        {/* Primer nivel: seis entradas. Cada grupo lleva a su primera pantalla. */}
-        <div className="limite" style={{ paddingTop: 12 }}>
+        {/* Primer nivel: seis entradas. Cada grupo lleva a su primera pantalla.
+            En pantalla angosta se reemplaza por el botón de menú. */}
+        <div className="limite solo-ancho" style={{ paddingTop: 12 }}>
           <nav className="fc-tabs" aria-label="Secciones del panel">
             <NavLink to="/admin" end className="nav-tab">
               <Icono nombre="panel" tam={18} /> Panel
@@ -62,7 +65,7 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
 
         {/* Segundo nivel: solo el del grupo en el que uno está. */}
         {grupoActivo && (
-          <div className="limite" style={{ paddingTop: 8, paddingBottom: 12 }}>
+          <div className="limite solo-ancho" style={{ paddingTop: 8, paddingBottom: 12 }}>
             <nav className="fc-tabs" aria-label={`Dentro de ${grupoActivo.label}`}>
               {grupoActivo.items.map((it) => (
                 <NavLink key={it.a} to={it.a} className="nav-sub" title={it.nota}>
@@ -75,7 +78,8 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         {!grupoActivo && <div style={{ height: 12 }} />}
       </header>
 
-      <main id="principal" className="limite" tabIndex={-1}
+      <main id="principal" className="limite entra" tabIndex={-1}
+            key={pathname}
             style={{ flex: 1, width: '100%', padding: '40px 24px 96px' }}>
         {children}
       </main>

@@ -72,7 +72,7 @@ export default function Proyecto() {
           <div className="eyebrow">
             <Link to="/admin/proyectos">Proyectos</Link> — propuesta e informe
           </div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.14, marginTop: 6 }}>{p.nombre}</h1>
+          <h1 className="tipo-display">{p.nombre}</h1>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           {sucio && <span style={{ fontSize: 13, color: 'var(--rojo-oscuro)' }}>sin guardar</span>}
@@ -98,7 +98,7 @@ export default function Proyecto() {
             <div className="field">
               <label htmlFor="pr-nombre">Nombre del proyecto</label>
               <input id="pr-nombre" className="input input-linea"
-                     style={{ fontFamily: 'var(--serif)', fontSize: 20, minHeight: 42 }}
+                     style={{ fontFamily: 'var(--serif)', fontSize: 19, minHeight: 42 }}
                      value={p.nombre} onChange={(e) => set('nombre', e.target.value)} />
             </div>
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr', marginTop: 14 }}>
@@ -431,7 +431,7 @@ function Participantes({ proyecto }: { proyecto: TProyecto }) {
                     <td className="obra">
                       {f.nombre}
                       {f.cedula_mascara && (
-                        <span className="tenue numeral" style={{ fontSize: 11, display: 'block' }}>
+                        <span className="tenue numeral" style={{ fontSize: 12, display: 'block' }}>
                           {f.cedula_mascara}
                         </span>
                       )}
@@ -439,7 +439,7 @@ function Participantes({ proyecto }: { proyecto: TProyecto }) {
                     <td style={{ fontSize: 13 }} title={f.condicion_origen ?? undefined}>
                       {f.condicion ? CONDICIONES[f.condicion] : '—'}
                       {f.periodo_verificado && (
-                        <span className="tenue" style={{ fontSize: 11, display: 'block' }}>
+                        <span className="tenue" style={{ fontSize: 12, display: 'block' }}>
                           {f.periodo_verificado}
                         </span>
                       )}
@@ -720,7 +720,7 @@ function EditorInforme({
     <div style={{ maxWidth: 880 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     gap: 16, flexWrap: 'wrap', marginTop: 20 }}>
-        <h2 style={{ fontSize: 25 }}>Informe de proyecto de extensión universitaria</h2>
+        <h2 className="tipo-titulo">Informe de proyecto de extensión universitaria</h2>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={() => void redactar()}
                   disabled={redactando}>

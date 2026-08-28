@@ -60,8 +60,8 @@ export default function Ajustes() {
   return (
     <div style={{ maxWidth: 860 }}>
       <div className="eyebrow">Ajustes</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Correo saliente</h1>
-      <p style={{ maxWidth: '72ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Correo saliente</h1>
+      <p className="entradilla">
         El sistema no envía en el momento: encola. Una tarea drena la cola cada quince minutos
         respetando el tope diario del proveedor, de modo que un congreso de trescientas personas
         no rompe nada ni se pierde ningún aviso.
@@ -115,7 +115,7 @@ export default function Ajustes() {
       <SeccionIA cfg={cfg} editable={permisos.configura} alGuardar={guardar} />
 
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-      <h2 style={{ fontSize: 25 }}>Puesta en marcha del correo</h2>
+      <h2 className="tipo-titulo">Puesta en marcha del correo</h2>
       <ol style={{ paddingLeft: 20, fontSize: 14, lineHeight: 1.7, color: 'var(--tenue-2)',
                    maxWidth: '76ch' }}>
         <li>
@@ -203,7 +203,7 @@ function SeccionIA({
 
   return (
     <>
-      <h2 style={{ fontSize: 25 }}>Redacción asistida de informes</h2>
+      <h2 className="tipo-titulo">Redacción asistida de informes</h2>
       <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '10px 0 0' }}>
         El botón «Redactar un borrador» del editor de informes arma un texto con la estructura
         del formato oficial a partir de lo cargado del proyecto y de las cifras reales de
@@ -223,7 +223,7 @@ function SeccionIA({
                              background: puesto ? 'var(--papel)' : 'transparent',
                              border: `1px solid ${puesto ? 'var(--rojo)' : 'var(--regla)'}`,
                              borderTopWidth: puesto ? 3 : 1, padding: '14px 16px' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 18 }}>
+              <div className="tipo-titulo">
                 {p.label}{puesto && <span style={{ color: 'var(--rojo)', fontSize: 13 }}> · en uso</span>}
               </div>
               <div style={{ fontSize: 13, color: 'var(--tenue-2)', marginTop: 6 }}>{p.nota}</div>

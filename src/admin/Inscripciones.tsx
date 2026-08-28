@@ -100,7 +100,7 @@ export default function Inscripciones() {
                     gap: 24, flexWrap: 'wrap' }}>
         <div style={{ maxWidth: '40ch' }}>
           <div className="eyebrow">Inscripciones</div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.15, marginTop: 6 }}>
+          <h1 className="tipo-display">
             {actividad?.titulo ?? '—'}
           </h1>
         </div>
@@ -150,7 +150,7 @@ export default function Inscripciones() {
                               style={{ color: 'var(--rojo-oscuro)', marginLeft: 4 }}>✓</span>
                       )}
                       {i.condicion_declarada && i.condicion_declarada !== i.condicion && (
-                        <span className="tenue" style={{ display: 'block', fontSize: 11 }}>
+                        <span className="tenue" style={{ display: 'block', fontSize: 12 }}>
                           declaró {CONDICIONES[i.condicion_declarada] ?? i.condicion_declarada}
                         </span>
                       )}
@@ -230,7 +230,7 @@ function Editor({
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div className="tarjeta" style={{ padding: 30, width: '100%', maxWidth: 460,
                                         display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <h2 style={{ fontSize: 23 }}>Editar inscripción</h2>
+        <h2 className="tipo-titulo">Editar inscripción</h2>
         <div className="field">
           <label htmlFor="e-nombre">Nombre y apellido</label>
           <input id="e-nombre" className="input" value={nombre}

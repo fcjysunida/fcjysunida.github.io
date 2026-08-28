@@ -67,7 +67,7 @@ export default function CheckIn() {
       <div className="tarjeta" style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 22 }}>
         <div>
           <div className="eyebrow">Registro de asistencia</div>
-          <h1 style={{ fontSize: 27, lineHeight: 1.18, marginTop: 6 }}>{ctx.titulo}</h1>
+          <h1 style={{ fontSize: 26, lineHeight: 1.18, marginTop: 6 }}>{ctx.titulo}</h1>
           <div style={{ fontSize: 14, color: 'var(--md-on-surface-variant)', marginTop: 6 }}>
             {ctx.hay_jornada && ctx.fecha
               ? `Jornada ${ctx.jornada} — ${diaLargo(ctx.fecha)}`
@@ -82,7 +82,7 @@ export default function CheckIn() {
           </p>
         ) : registrado ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <p style={{ fontFamily: 'var(--serif)', fontSize: 20, margin: 0 }}>{mensaje}</p>
+            <p style={{ fontFamily: 'var(--serif)', fontSize: 19, margin: 0 }}>{mensaje}</p>
             {encuesta?.pendiente ? (
               <Encuesta token={token} cedula={cedula} ultima={encuesta.ultima}
                         alTerminar={() => setEncuesta({ pendiente: false, ultima: encuesta.ultima })} />
@@ -106,7 +106,7 @@ export default function CheckIn() {
               <label htmlFor="cod">Código de sala de esta jornada</label>
               <input id="cod" className="input" inputMode="numeric" maxLength={4} autoComplete="off"
                      style={{ minHeight: 52, letterSpacing: '0.3em',
-                              fontFamily: 'var(--serif)', fontSize: 24 }}
+                              fontFamily: 'var(--serif)', fontSize: 22 }}
                      value={codigo}
                      onChange={(e) => { setCodigo(e.target.value.replace(/\D/g, '')); setError('') }} />
               <span className="ayuda">
@@ -189,7 +189,7 @@ function Encuesta({
                   display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
         <div className="eyebrow">Evaluación de la actividad</div>
-        <h2 style={{ fontSize: 22, marginTop: 6 }}>
+        <h2 className="tipo-titulo" style={{ marginTop: 6 }}>
           {ultima ? '¿Cómo resultó la actividad?' : '¿Cómo viene resultando la actividad?'}
         </h2>
         <p className="tenue" style={{ fontSize: 14, margin: '8px 0 0' }}>

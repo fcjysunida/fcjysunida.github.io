@@ -39,7 +39,7 @@ export default function Derechos() {
   return (
     <Marco ancho={640}>
       <div className="eyebrow">Derechos del titular — artículos 26 a 33</div>
-      <h1 style={{ fontSize: 34, lineHeight: 1.12, marginTop: 8 }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>
         Acceso, rectificación, oposición, supresión, portabilidad y revocación
       </h1>
       <p style={{ color: 'var(--tenue-2)', margin: '14px 0 0' }}>
@@ -52,7 +52,7 @@ export default function Derechos() {
 
       {hecho ? (
         <div className="tarjeta" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: 24 }}>Su solicitud quedó registrada</h2>
+          <h2 className="tipo-titulo">Su solicitud quedó registrada</h2>
           <p style={{ color: 'var(--tenue-2)', marginTop: 10 }}>
             Recibirá la respuesta en el correo declarado. El plazo máximo de atención vence
             el {hecho}. Si no obtiene respuesta puede reclamar ante la {AUTORIDAD}.

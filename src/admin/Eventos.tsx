@@ -96,8 +96,8 @@ export default function Eventos() {
   return (
     <div>
       <div className="eyebrow">Extensión — sin inscripción</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Registros de actividad</h1>
-      <p style={{ maxWidth: '78ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Registros de actividad</h1>
+      <p className="entradilla">
         Reuniones con empresas, visitas, ferias de empleo y firmas de convenio. Se cargan
         <strong> después de que ocurrieron</strong>: no abren formulario ni toman asistencia.
         Llevan informe, nómina cargada a mano y, si corresponde, certificación —lo que piden
@@ -135,7 +135,7 @@ export default function Eventos() {
 
       {abierto && (
         <div className="tarjeta" style={{ padding: 22, marginBottom: 30, maxWidth: 780 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19, marginBottom: 16 }}>
+          <div className="tipo-titulo" style={{ marginBottom: 16 }}>
             {form.id ? 'Editar el registro' : 'Nuevo registro'}
           </div>
 

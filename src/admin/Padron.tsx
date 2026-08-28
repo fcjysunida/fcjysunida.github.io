@@ -31,10 +31,10 @@ export default function Padron() {
   return (
     <div>
       <div className="eyebrow">Registro académico</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8, maxWidth: '28ch' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8, maxWidth: '28ch' }}>
         Padrón de estudiantes y egresados por período
       </h1>
-      <p style={{ maxWidth: '72ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <p className="entradilla">
         Es lo que permite no depender de lo que la persona declara al inscribirse. Al recibir
         una inscripción, el sistema busca la cédula en el padrón y fija la condición efectiva:
         estudiante si figura como tal en el período de la actividad, egresado si figura como
@@ -60,7 +60,7 @@ export default function Padron() {
       )}
 
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-      <h2 style={{ fontSize: 25 }}>Períodos</h2>
+      <h2 className="tipo-titulo">Períodos</h2>
       {resumen.length === 0 ? (
         <p className="tenue" style={{ marginTop: 12 }}>
           Todavía no hay períodos cargados. Cree el primero arriba y después importe la planilla.
@@ -130,7 +130,7 @@ function NuevoPeriodo({ alGuardar }: { alGuardar: (m: string) => void }) {
   return (
     <div style={{ marginTop: 30 }}>
       <hr className="rule" style={{ marginBottom: 20 }} />
-      <h2 style={{ fontSize: 22 }}>Agregar un período</h2>
+      <h2 className="tipo-titulo">Agregar un período</h2>
       <p className="bloque-nota">
         Las fechas delimitan qué actividades caen dentro del período, que es lo que decide si
         alguien era estudiante en ese momento.
@@ -188,7 +188,7 @@ function Importador({
   return (
     <div style={{ marginTop: 30 }}>
       <hr className="rule" style={{ marginBottom: 20 }} />
-      <h2 style={{ fontSize: 22 }}>Importar una planilla</h2>
+      <h2 className="tipo-titulo">Importar una planilla</h2>
       <p className="bloque-nota">
         Pegue las filas desde Excel o Google Sheets, o el contenido de un CSV. La primera línea
         debe ser el encabezado. Se reconocen las columnas <em>nombre</em>, <em>cédula</em>,{' '}

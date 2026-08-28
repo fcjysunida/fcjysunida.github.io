@@ -73,13 +73,13 @@ export default function Proyectos() {
                     gap: 24, flexWrap: 'wrap' }}>
         <div style={{ maxWidth: '46ch' }}>
           <div className="eyebrow">Extensión universitaria</div>
-          <h1 style={{ fontSize: 38, lineHeight: 1.1, marginTop: 8 }}>Proyectos e informes</h1>
+          <h1 className="tipo-display" style={{ marginTop: 8 }}>Proyectos e informes</h1>
         </div>
         {permisos.creaActividad && (
           <button className="btn btn-primary" onClick={() => void crear()}>Nuevo proyecto</button>
         )}
       </div>
-      <p style={{ maxWidth: '76ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <p className="entradilla">
         La propuesta sigue el formato «9. Propuesta de Proyecto de Extensión Universitaria» y el
         informe final, el formato «10». Ambos se exportan en Word. Las actividades de las
         memorias 2021–2025 están cargadas como proyectos finalizados: sirven de historial y de

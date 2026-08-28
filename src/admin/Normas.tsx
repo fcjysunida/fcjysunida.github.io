@@ -60,8 +60,8 @@ export default function Normas() {
   return (
     <div style={{ maxWidth: 940 }}>
       <div className="eyebrow">Marco normativo</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Normograma</h1>
-      <p style={{ maxWidth: '76ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Normograma</h1>
+      <p className="entradilla">
         Las normas que rigen la extensión universitaria, la proyección social y las
         prácticas preprofesionales, con el articulado pertinente transcrito de la fuente
         publicada. Cada norma enlaza al documento original.
@@ -97,7 +97,7 @@ export default function Normas() {
                 )}
               </div>
 
-              <h2 style={{ fontSize: 22, lineHeight: 1.25, margin: '4px 0 0' }}>{n.titulo}</h2>
+              <h2 className="tipo-titulo" style={{ lineHeight: 1.25, margin: '4px 0 0' }}>{n.titulo}</h2>
               {n.organo && (
                 <div className="tenue" style={{ fontSize: 13, marginTop: 2 }}>{n.organo}</div>
               )}
@@ -118,7 +118,7 @@ export default function Normas() {
                         )}
                       </div>
                       <blockquote style={{ margin: '5px 0 0', fontFamily: 'var(--serif)',
-                                           fontSize: 15.5, lineHeight: 1.55,
+                                           fontSize: 15, lineHeight: 1.55,
                                            maxWidth: '70ch' }}>
                         «{a.texto}»
                       </blockquote>
@@ -128,7 +128,7 @@ export default function Normas() {
               )}
 
               {n.sin_texto && (
-                <p style={{ marginTop: 16, fontSize: 13.5, color: 'var(--tenue-2)' }}>
+                <p style={{ marginTop: 16, fontSize: 13, color: 'var(--tenue-2)' }}>
                   El PDF publicado es un escaneo sin capa de texto, así que no se transcribe
                   articulado: se enlaza el documento original para consultarlo.
                 </p>

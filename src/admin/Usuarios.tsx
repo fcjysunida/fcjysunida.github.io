@@ -45,8 +45,8 @@ export default function Usuarios() {
   return (
     <div style={{ maxWidth: 980 }}>
       <div className="eyebrow">Acceso al panel</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Usuarios y roles</h1>
-      <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Usuarios y roles</h1>
+      <p className="entradilla">
         Quien se registra en el panel queda <strong>sin permisos</strong> hasta que la Dirección
         le asigna un rol. Nadie puede habilitarse a sí mismo, y cada asignación o cambio queda
         asentado en el registro de auditoría.
@@ -59,7 +59,7 @@ export default function Usuarios() {
       {/* ── Cómo dar acceso ────────────────────────────────────────────── */}
       {permisos.configura && (
         <div className="tarjeta" style={{ padding: 20, marginBottom: 32, maxWidth: 780 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>Cómo dar acceso a alguien</div>
+          <div className="tipo-titulo">Cómo dar acceso a alguien</div>
           <ol style={{ margin: '10px 0 0 18px', padding: 0, fontSize: 14,
                        color: 'var(--tenue-2)', lineHeight: 1.65 }}>
             <li>
@@ -86,10 +86,10 @@ export default function Usuarios() {
       {/* ── Pendientes ─────────────────────────────────────────────────── */}
       {permisos.configura && (
         <>
-          <h2 style={{ fontSize: 25 }}>
+          <h2 className="tipo-titulo">
             Cuentas esperando rol
             {pendientes.length > 0 && (
-              <span style={{ color: 'var(--rojo)', marginLeft: 10, fontSize: 20 }}>
+              <span style={{ color: 'var(--rojo)', marginLeft: 10, fontSize: 19 }}>
                 {pendientes.length}
               </span>
             )}
@@ -119,7 +119,7 @@ export default function Usuarios() {
       )}
 
       {/* ── Habilitados ────────────────────────────────────────────────── */}
-      <h2 style={{ fontSize: 25 }}>Cuentas habilitadas</h2>
+      <h2 className="tipo-titulo">Cuentas habilitadas</h2>
       <div className="fc-scroll" style={{ marginTop: 12 }}>
         <table className="table" style={{ minWidth: 860 }}>
           <thead>
@@ -184,12 +184,12 @@ export default function Usuarios() {
 
       {/* ── Qué puede cada rol ─────────────────────────────────────────── */}
       <hr className="rule-strong" style={{ margin: '36px 0 20px' }} />
-      <h2 style={{ fontSize: 25 }}>Qué puede cada rol</h2>
+      <h2 className="tipo-titulo">Qué puede cada rol</h2>
       <div style={{ display: 'grid', gap: 22, marginTop: 16,
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         {ROLES.map((r) => (
           <div key={r.id} style={{ borderTop: '1px solid var(--regla)', paddingTop: 14 }}>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>{r.label}</div>
+            <div className="tipo-titulo">{r.label}</div>
             <p style={{ fontSize: 14, color: 'var(--tenue-2)', margin: '6px 0 0' }}>
               {QUE_HACE[r.id]}
             </p>

@@ -156,8 +156,8 @@ export default function Pasantias() {
   return (
     <div>
       <div className="eyebrow">Prácticas preprofesionales</div>
-      <h1 style={{ fontSize: 36, lineHeight: 1.12, marginTop: 8 }}>Pasantías</h1>
-      <p style={{ maxWidth: '78ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <h1 className="tipo-display" style={{ marginTop: 8 }}>Pasantías</h1>
+      <p className="entradilla">
         La pasantía es requisito de egreso (art. 5) y es obligatoria desde el sexto semestre
         (art. 7 inc. b). Se cumplen <strong>264 horas reloj</strong> (art. 29) y se aprueba
         con al menos <strong>70 %</strong>, ponderando 40 % la unidad receptora y 60 % la
@@ -184,7 +184,7 @@ export default function Pasantias() {
       {/* ── Convalidación por egreso ──────────────────────────────────── */}
       {permisos.creaActividad && (
         <div className="tarjeta" style={{ padding: 20, marginBottom: 32 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+          <div className="tipo-titulo">
             Convalidación por egreso — art. 35
           </div>
           <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '8px 0 14px',
@@ -221,7 +221,7 @@ export default function Pasantias() {
       )}
 
       {/* ── Conteo por período ────────────────────────────────────────── */}
-      <div style={{ fontFamily: 'var(--serif)', fontSize: 19, marginBottom: 12 }}>
+      <div className="tipo-titulo" style={{ marginBottom: 12 }}>
         Conteo por período
       </div>
       <div className="fc-scroll" style={{ marginBottom: 34 }}>
@@ -255,7 +255,7 @@ export default function Pasantias() {
       {/* ── Nómina ────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
                     gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+        <div className="tipo-titulo">
           Nómina
           {filas && (
             <span className="tenue" style={{ fontSize: 14, fontFamily: 'var(--sans)' }}>
@@ -351,7 +351,7 @@ export default function Pasantias() {
       {/* ── Alta o edición ────────────────────────────────────────────── */}
       {abierta && (
         <div className="tarjeta" style={{ padding: 22, marginTop: 26, maxWidth: 760 }}>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>
+          <div className="tipo-titulo">
             Pasantía de {abierta.nombre}
           </div>
           <p style={{ color: 'var(--tenue-2)', margin: '6px 0 18px', fontSize: 14 }}>

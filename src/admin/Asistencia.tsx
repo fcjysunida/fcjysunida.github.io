@@ -35,7 +35,7 @@ export default function Asistencia() {
                     gap: 24, flexWrap: 'wrap' }}>
         <div style={{ maxWidth: '40ch' }}>
           <div className="eyebrow">Asistencia por jornada</div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.15, marginTop: 6 }}>{actividad?.titulo ?? '—'}</h1>
+          <h1 className="tipo-display">{actividad?.titulo ?? '—'}</h1>
         </div>
         <Selector acts={acts} id={id} elegir={elegir} />
       </div>
@@ -139,7 +139,7 @@ export default function Asistencia() {
 
       {actividad && permisos.creaActividad && actividad.estado === 'publicada' && (
         <div style={{ marginTop: 40, borderTop: '2px solid var(--regla-fuerte)', paddingTop: 22 }}>
-          <h2 style={{ fontSize: 21 }}>Cierre de la actividad</h2>
+          <h2 className="tipo-titulo">Cierre de la actividad</h2>
           <p style={{ fontSize: 14, color: 'var(--tenue-2)', maxWidth: '70ch', marginTop: 8 }}>
             Al cerrarla dejan de aceptarse inscripciones nuevas y empieza a correr el plazo de
             conservación de veinticuatro meses. El registro de asistencia y la evaluación de
