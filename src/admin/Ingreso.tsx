@@ -25,15 +25,21 @@ export default function Ingreso({ sinRol = false }: { sinRol?: boolean }) {
       // no necesita la clave de servicio y nadie se asigna permisos a sí mismo.
       const { error: err } = await supabase.auth.signUp({
         email: email.trim(), password: clave,
-        options: { data: { nombre: nombre.trim() } },
+        options: {
+          data: { nombre: nombre.trim() },
+          // Sin esto, Supabase manda el enlace de confirmación al «Site URL»
+          // del proyecto, que de fábrica es http://localhost:3000.
+          emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}admin`,
+        },
       })
       if (err) {
         setError(err.message.includes('already')
           ? 'Ya existe una cuenta con ese correo. Ingrese con su contraseña.'
           : 'No pudimos crear la cuenta.')
       } else {
-        setNota('Cuenta creada. Si el correo pide confirmación, revise su bandeja. ' +
-                'Después, la Dirección debe asignarle un rol para que pueda entrar.')
+        setNota('Cuenta creada. Si el correo pide confirmación, revise su bandeja; ' +
+                'si el enlace no llega o no funciona, la Dirección puede confirmarla ' +
+                'desde el panel. Después le asignará un rol para que pueda entrar.')
         setModo('entrar')
       }
       setCargando(false); return

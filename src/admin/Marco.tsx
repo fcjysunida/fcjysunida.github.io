@@ -15,6 +15,7 @@ const PESTANAS = [
   { a: '/admin/proyectos',       label: 'Proyectos' },
   { a: '/admin/padron',          label: 'Padrón' },
   { a: '/admin/seguridad',       label: 'Protección de datos' },
+  { a: '/admin/usuarios',        label: 'Usuarios' },
   { a: '/admin/ajustes',         label: 'Ajustes' },
 ]
 

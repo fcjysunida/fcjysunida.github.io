@@ -281,3 +281,36 @@ export async function leerConfiguracion(): Promise<Record<string, string>> {
 
 export const guardarConfiguracion = (clave: string, valor: string) =>
   rpc<{ ok: boolean }>('configuracion_guardar', { p_clave: clave, p_valor: valor })
+
+// ── Usuarios y roles ─────────────────────────────────────────────────────────
+export interface UsuarioPendiente {
+  id: string
+  email: string
+  nombre: string
+  registrado_en: string
+  correo_confirmado: boolean
+}
+
+export interface UsuarioPanel {
+  id: string
+  email: string
+  nombre: string
+  rol: import('../lib/tipos').Rol
+  activo: boolean
+  creado_en: string
+  correo_confirmado: boolean
+  es_uno_mismo: boolean
+}
+
+export const usuariosPendientes = () => rpc<UsuarioPendiente[]>('usuarios_pendientes')
+export const usuariosListar = () => rpc<UsuarioPanel[]>('usuarios_listar')
+
+export const asignarRol = (id: string, rol: string, nombre?: string) =>
+  rpc<{ ok: boolean }>('usuario_asignar_rol',
+    { p_id: id, p_rol: rol, p_nombre: nombre ?? null })
+
+export const activarUsuario = (id: string, activo: boolean) =>
+  rpc<{ ok: boolean }>('usuario_activar', { p_id: id, p_activo: activo })
+
+export const confirmarCorreo = (id: string) =>
+  rpc<{ ok: boolean }>('usuario_confirmar_correo', { p_id: id })

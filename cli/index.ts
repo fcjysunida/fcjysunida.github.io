@@ -306,7 +306,7 @@ async function main(): Promise<void> {
         fatal('--condicion debe ser estudiante o egresado.')
       }
       const forzado: Record<string, number> = {}
-      for (const k of ['nombre', 'cedula', 'matricula', 'carrera', 'ciclo']) {
+      for (const k of ['nombre', 'cedula', 'matricula', 'carrera', 'ciclo', 'periodo']) {
         const v = args[`col-${k}`]
         if (typeof v === 'string') forzado[k] = Number(v) - 1
       }
@@ -336,29 +336,55 @@ async function main(): Promise<void> {
       if (filas.length === 0) fatal('No hay filas para importar.')
 
       const db = await comoOperador()
-      // En lotes: una planilla de varios miles de filas no entra en una sola llamada.
-      const LOTE = 400
-      let procesadas = 0, omitidas = 0, total = 0, extranjeros = 0
-      for (let i = 0; i < filas.length; i += LOTE) {
-        const { data, error } = await db.rpc('padron_importar', {
-          p_periodo: periodo, p_condicion: condicion, p_filas: filas.slice(i, i + LOTE),
-        })
-        if (error) fatal(error.message)
-        const r = data as Record<string, number>
-        procesadas += Number(r.procesadas ?? 0)
-        omitidas += Number(r.omitidas ?? 0)
-        extranjeros += Number(r.documentos_no_paraguayos ?? 0)
-        total = Number(r.total_periodo ?? 0)
-        process.stdout.write(`\r  Cargando… ${procesadas}/${filas.length}`)
+
+      // Si la planilla trae su propia columna de período —como la nómina de
+      // egresados, que abarca varios— se respeta el de cada fila; si no, el
+      // que se pasó por argumento.
+      const porPeriodo = new Map<string, typeof filas>()
+      for (const f of filas) {
+        const p = f.periodo ?? periodo
+        if (!porPeriodo.has(p)) porPeriodo.set(p, [])
+        porPeriodo.get(p)!.push(f)
       }
-      console.log(`\n\n  ${procesadas} registros cargados en ${periodo} como ${condicion}.`)
+      if (porPeriodo.size > 1) {
+        console.log(`  La planilla abarca ${porPeriodo.size} períodos: ` +
+                    `${[...porPeriodo.keys()].sort().join(', ')}`)
+      }
+
+      const LOTE = 400
+      let procesadas = 0, omitidas = 0, extranjeros = 0, soloMatricula = 0
+      for (const [p, grupo] of [...porPeriodo.entries()].sort()) {
+        for (let i = 0; i < grupo.length; i += LOTE) {
+          const { data, error } = await db.rpc('padron_importar', {
+            p_periodo: p, p_condicion: condicion, p_filas: grupo.slice(i, i + LOTE),
+          })
+          if (error) fatal(`${p}: ${error.message}`)
+          const r = data as Record<string, number>
+          procesadas += Number(r.procesadas ?? 0)
+          omitidas += Number(r.omitidas ?? 0)
+          extranjeros += Number(r.documentos_no_paraguayos ?? 0)
+          soloMatricula += Number(r.solo_matricula ?? 0)
+          process.stdout.write(`\r  Cargando… ${procesadas}/${filas.length}`)
+        }
+      }
+      const total = procesadas
+      const donde = porPeriodo.size > 1
+        ? `${porPeriodo.size} períodos` : [...porPeriodo.keys()][0] ?? periodo
+      console.log(`\n\n  ${procesadas} registros cargados en ${donde} como ${condicion}.`)
       if (extranjeros > 0) {
         console.log(`  ${extranjeros} con documento no paraguayo: se importan igual.`)
       }
       if (omitidas > 0) {
         console.log(`  ${omitidas} omitidos por falta de documento o de nombre.`)
       }
-      console.log(`  El período tiene ahora ${total} registros.`)
+      if (soloMatricula > 0) {
+        console.log(`  ${soloMatricula} sin documento, identificados por matrícula.`)
+        const { data: v } = await db.rpc('padron_vincular_por_matricula')
+        const vv = v as Record<string, number>
+        console.log(`  Vinculación por matrícula: ${vv?.vinculadas ?? 0} completadas, ` +
+                    `${vv?.sin_vincular ?? 0} siguen sin documento.`)
+      }
+      console.log(`  ${total} registros procesados en total.`)
 
       const { data: cruce } = await db.rpc('recruzar_padron', { p_actividad: null })
       const c = cruce as Record<string, number>

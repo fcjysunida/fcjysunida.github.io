@@ -36,6 +36,14 @@ export interface FilaPadron {
   matricula?: string
   carrera?: string
   ciclo?: string
+  /** Período propio de la fila, si la planilla trae una columna de período. */
+  periodo?: string
+}
+
+/** «2021-02», «2021-2», «2021/2» y «202102» son el mismo período. */
+export function normalizarPeriodo(v: string): string | undefined {
+  const m = v.trim().match(/^(\d{4})\s*[-/._]?\s*0?([12])$/)
+  return m ? `${m[1]}-${m[2]}` : undefined
 }
 
 const sinTildes = (s: string) =>
@@ -85,6 +93,7 @@ function armarAcademico(m: Record<string, number>, filas: string[][]): FilaPadro
         matricula: en(f, m.matricula ?? -1).replace(/\.0$/, '') || undefined,
         carrera: en(f, m.carrera ?? -1) || undefined,
         ciclo: undefined,
+        periodo: normalizarPeriodo(en(f, m.periodo ?? -1)),
       }
     })
     .filter((f) => f.nombre !== '' && f.cedula !== '')
@@ -92,31 +101,34 @@ function armarAcademico(m: Record<string, number>, filas: string[][]): FilaPadro
 
 function armar(cab: string[], filas: string[][], forzado: Record<string, number>): FilaPadron[] {
   const i = {
-    nombre: forzado.nombre ?? indice(cab, 'nombre', 'apellido'),
+    nombre: forzado.nombre ?? indice(cab, 'nombre', 'apellido', 'estudiante', 'egresado'),
     cedula: forzado.cedula ?? indice(cab, 'cedula', 'documento', 'ci'),
     matricula: forzado.matricula ?? indice(cab, 'matricula', 'matr'),
     carrera: forzado.carrera ?? indice(cab, 'carrera'),
     ciclo: forzado.ciclo ?? indice(cab, 'ciclo', 'semestre', 'curso'),
     tipoDoc: forzado.tipoDoc ?? indice(cab, 'tipo de doc', 'tipo_doc', 'gdoc'),
+    periodo: forzado.periodo ?? indice(cab, 'periodo'),
   }
-  if (i.nombre < 0 || i.cedula < 0) {
+  if (i.nombre < 0 || (i.cedula < 0 && i.matricula < 0)) {
     throw new Error(
-      'No encontré las columnas de nombre y cédula.\n' +
+      'No encontré la columna de nombre, ni cédula ni matrícula.\n' +
       `  Encabezados leídos: ${cab.join(' | ')}\n` +
-      '  Indíquelas a mano con --col-nombre N --col-cedula N (la primera columna es 1).',
+      '  Indíquelas a mano con --col-nombre N --col-cedula N --col-matricula N\n' +
+      '  (la primera columna es 1).',
     )
   }
   const en = (f: string[], k: number) => (k >= 0 ? (f[k] ?? '').toString().trim() : '')
   return filas
     .map((f) => ({
       nombre: en(f, i.nombre),
-      cedula: en(f, i.cedula),
+      cedula: en(f, i.cedula).replace(/\.0$/, ''),
       tipo_documento: en(f, i.tipoDoc) || undefined,
-      matricula: en(f, i.matricula) || undefined,
+      matricula: en(f, i.matricula).replace(/\.0$/, '') || undefined,
       carrera: en(f, i.carrera) || undefined,
       ciclo: en(f, i.ciclo) || undefined,
+      periodo: normalizarPeriodo(en(f, i.periodo)),
     }))
-    .filter((f) => f.nombre !== '' && f.cedula !== '')
+    .filter((f) => f.nombre !== '' && (f.cedula !== '' || (f.matricula ?? '') !== ''))
 }
 
 /** Lee la planilla y devuelve las filas y los encabezados detectados. */
@@ -163,7 +175,7 @@ export async function leerPlanilla(
     // El encabezado no siempre está en la primera fila: se busca la primera que
     // mencione «cédula» o «documento», que es la columna que nunca falta.
     let iCab = filas.findIndex((f) =>
-      f.some((c) => ['cedula', 'documento', 'p_ndoc_identidad'].some((k) =>
+      f.some((c) => ['cedula', 'documento', 'p_ndoc_identidad', 'matricula'].some((k) =>
         sinTildes(c).includes(k))))
     if (iCab < 0) iCab = 0
 
