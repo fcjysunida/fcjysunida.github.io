@@ -96,7 +96,8 @@ export const sensiblesDe = (inscripcion: string, motivo: string) =>
   )
 
 export const indicadores = (periodo: string) => rpc<Indicadores>('indicadores', { p_periodo: periodo })
-export const periodos = () => rpc<{ periodo: string; actividades: number }[]>('periodos_disponibles')
+export const periodos = () =>
+  rpc<{ periodo: string; actividades: number; proyectos: number }[]>('periodos_disponibles')
 export const satisfaccionDe = (id: string) => rpc<Satisfaccion>('satisfaccion_de', { p_actividad: id })
 export const comentariosDe = (id: string) =>
   rpc<{ comentario: string }[]>('comentarios_de', { p_actividad: id })
@@ -438,3 +439,64 @@ export const avisarCertificados = (actividadId: string, simulacion: boolean) =>
   rpc<{ ok: boolean; simulacion: boolean; a_enviar: number; ya_avisados: number;
         sin_correo_valido: number }>(
     'avisar_certificados', { p_actividad: actividadId, p_solo_simulacion: simulacion })
+
+// ── Horas de Extensión Universitaria ─────────────────────────────────────────
+// Las horas respaldadas salen de la asistencia y de las nóminas de proyecto; las
+// históricas se acreditan a mano y no tienen respaldo en la plataforma.
+
+export type ResumenExtension = {
+  periodo: string
+  condicion: CondicionAcademica
+  personas: number
+  cumplen: number
+  sin_horas: number
+  horas_promedio: number
+  horas_respaldadas: number
+  horas_historicas: number
+  horas_total: number
+}
+
+export type FilaExtension = {
+  padron_id: string
+  nombre: string
+  cedula_mascara: string | null
+  matricula: string | null
+  cohorte: string | null
+  carrera: string | null
+  condicion: CondicionAcademica
+  periodo: string
+  horas_asistencia: number
+  horas_proyectos: number
+  horas_historicas: number
+  horas_ajustes: number
+  horas_total: number
+  horas_faltantes: number
+  cumple: boolean
+}
+
+export const extensionResumen = () => rpc<ResumenExtension[]>('extension_resumen')
+
+export const extensionNomina = (f: {
+  periodo?: string | null; condicion?: string | null
+  texto?: string | null; soloDeuda?: boolean; limite?: number
+}) => rpc<FilaExtension[]>('extension_nomina', {
+  p_periodo: f.periodo || null, p_condicion: f.condicion || null,
+  p_texto: f.texto || null, p_solo_deuda: f.soloDeuda ?? false,
+  p_limite: f.limite ?? 300,
+})
+
+export const acreditarHoras = (a: {
+  padronId: string; horas: number; periodo?: string | null
+  motivo: string; detalle?: string | null; origen?: 'historica' | 'ajuste'
+}) => rpc<{ ok: boolean; id: string }>('horas_extension_agregar', {
+  p_padron_id: a.padronId, p_horas: a.horas, p_periodo: a.periodo || null,
+  p_motivo: a.motivo, p_detalle: a.detalle || null, p_origen: a.origen ?? 'historica',
+})
+
+export const acreditarEgresados = (cohortes: string[], motivo: string, simulacion: boolean) =>
+  rpc<{
+    simulacion: boolean; meta: number; personas: number; horas: number
+    detalle: { nombre: string; matricula: string; cohorte: string
+               periodo_egreso: string; tenia: number; se_acreditan: number }[]
+  }>('horas_extension_acreditar_egresados',
+     { p_cohortes: cohortes, p_motivo: motivo, p_dry_run: simulacion })

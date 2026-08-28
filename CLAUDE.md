@@ -86,6 +86,7 @@ ningún indicador. Los campos con `mapa: "nombre"` y `mapa: "cedula"` son impres
 | Padrón académico | `/admin/padron` | Nómina por período; fija la condición verificada |
 | Constancias | `/admin/certificados`, `/c/:codigo` | Emisión por lote y verificación pública |
 | Proyectos de extensión | `/admin/proyectos` | Formatos oficiales 9 y 10, exportación en Word |
+| Horas de extensión | `/admin/extension` | Horas por persona, meta de la carrera, acreditación histórica |
 | Correo | `/admin/ajustes` | Cola con tope diario; Resend |
 
 ## Tareas frecuentes
@@ -154,6 +155,23 @@ lleva un código verificable en `/c/:codigo` y congela nombre, fecha y horas.
 npm run cli -- proyecto:exportar --id <uuid>                        # formato 9
 npm run cli -- proyecto:exportar --id <uuid> --informe <uuid>       # formato 10
 ```
+
+### Horas de Extensión Universitaria
+
+Cada estudiante debe acumular la meta de horas a lo largo de la carrera. La meta vive en
+`configuracion.extension_horas_meta` (hoy 33; el anexo de la escala menciona 30 en al menos
+tres actividades distintas, conviene contrastarlo con el reglamento vigente).
+
+Se cuentan por separado dos cosas que no son lo mismo:
+
+- **Respaldadas** — asistencia registrada en la plataforma o figurar en la nómina de un
+  proyecto. Las calcula la vista `extension_personas`, no se copian a ninguna tabla.
+- **Históricas** — acreditadas a mano en `horas_extension`, con motivo obligatorio, porque
+  son anteriores al sistema y ninguna asistencia las prueba.
+
+A un egresado se le puede acreditar el saldo que le falte: el título prueba que cumplió el
+requisito. Eso **no** lo convierte en participante de ningún proyecto concreto — inscribirlo
+en uno afirmaría una asistencia que nadie registró y ensuciaría los conteos de beneficiarios.
 
 ### Retención
 ```

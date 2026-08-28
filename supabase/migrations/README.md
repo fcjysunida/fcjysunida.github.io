@@ -50,6 +50,15 @@ indicadores, consentimiento, endurecimiento de permisos, claves y tareas.
 | `carga_manual_derecho_en_un_minuto` | Proyecto cuyo informe llegó en prosa, no en el formato oficial |
 | `carga_manual_workshop_chake_la_cita` | Alta de docentes del workshop de citación |
 | `enriquecer_chake_la_cita_con_formato_9` | Formato 9 del workshop sobre el registro de la memoria |
+| `horas_de_extension_por_persona` | Tabla `horas_extension` y meta de horas de la carrera |
+| `vista_extension_por_persona` | Vista `extension_personas`: horas respaldadas frente a históricas |
+| `meta_horas_configurable_y_escala_en_proyectos` | Meta en `configuracion` y escala del anexo aplicada a los proyectos |
+| `acreditacion_de_horas_de_extension` | `horas_extension_agregar()` y acreditación por egreso |
+| `exploracion_de_horas_por_periodo` | `extension_resumen()` y `extension_nomina()` |
+| `acreditar_egresados_cohortes_2020_2021` | 693 horas acreditadas a 21 egresados |
+| `periodos_disponibles_incluye_proyectos` | El selector de período abarca desde 2021 |
+| `indicadores_incluyen_proyectos` | Los indicadores cuentan los proyectos, no solo las actividades |
+| `cerrar_cuentas_de_servicio_y_de_prueba` | Cierre de las cuentas que no son personas reales |
 
 ## Reglas
 

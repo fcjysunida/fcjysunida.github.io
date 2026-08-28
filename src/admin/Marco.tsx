@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { etiquetaRol } from '../lib/campos'
-import { FACULTAD, RESPONSABLE, CORREO, DOMINIO_PUBLICO } from '../lib/institucion'
+import { FACULTAD, RESPONSABLE, CORREO } from '../lib/institucion'
 
 const PESTANAS = [
   { a: '/admin',                 label: 'Panel', exacta: true },
@@ -14,6 +14,7 @@ const PESTANAS = [
   { a: '/admin/certificados',    label: 'Constancias' },
   { a: '/admin/proyectos',       label: 'Proyectos' },
   { a: '/admin/padron',          label: 'Padrón' },
+  { a: '/admin/extension',       label: 'Horas de extensión' },
   { a: '/admin/seguridad',       label: 'Protección de datos' },
   { a: '/admin/usuarios',        label: 'Usuarios' },
   { a: '/admin/ajustes',         label: 'Ajustes' },
@@ -37,10 +38,7 @@ export default function MarcoAdmin({ children }: { children: ReactNode }) {
         </div>
         <div className="limite" style={{ paddingTop: 14 }}>
           <div style={{ fontFamily: 'var(--serif)', fontSize: 19, letterSpacing: '-0.01em' }}>
-            Inscripciones y asistencia{' '}
-            <span style={{ color: 'rgba(32,30,29,0.45)', fontStyle: 'italic' }}>
-              — {DOMINIO_PUBLICO}
-            </span>
+            Inscripciones y asistencia
           </div>
         </div>
         <div className="limite" style={{ paddingTop: 12 }}>

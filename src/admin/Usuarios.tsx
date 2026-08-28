@@ -7,6 +7,7 @@ import type { Rol } from '../lib/tipos'
 import { ROLES, etiquetaRol } from '../lib/campos'
 import { fechaHora } from '../lib/formato'
 import { usePermisos } from '../lib/sesion'
+import { basePublica } from '../lib/institucion'
 import { Cargando, Aviso } from '../ui/piezas'
 
 const QUE_HACE: Record<Rol, string> = {
@@ -54,6 +55,33 @@ export default function Usuarios() {
       <hr className="rule-strong" style={{ margin: '28px 0' }} />
       <Aviso>{error}</Aviso>
       <Aviso tono="nota">{aviso}</Aviso>
+
+      {/* ── Cómo dar acceso ────────────────────────────────────────────── */}
+      {permisos.configura && (
+        <div className="tarjeta" style={{ padding: 20, marginBottom: 32, maxWidth: 780 }}>
+          <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>Cómo dar acceso a alguien</div>
+          <ol style={{ margin: '10px 0 0 18px', padding: 0, fontSize: 14,
+                       color: 'var(--tenue-2)', lineHeight: 1.65 }}>
+            <li>
+              Pídale que entre a <code>{basePublica()}/admin</code> y elija
+              «Crear una cuenta» con su correo institucional.
+            </li>
+            <li>
+              Su cuenta aparece acá abajo, en <strong>cuentas esperando rol</strong>,
+              sin ningún permiso hasta que usted le asigne uno.
+            </li>
+            <li>
+              Asígnele el rol que corresponda. El cuadro de más abajo dice qué habilita cada uno.
+            </li>
+          </ol>
+          <p style={{ margin: '12px 0 0', fontSize: 14, color: 'var(--tenue-2)' }}>
+            Si prefiere crearla usted, desde la línea de comandos:{' '}
+            <code>npm run cli -- usuarios:alta --email … --nombre … --rol …</code>. Devuelve una
+            contraseña provisoria que hay que entregar por un canal seguro. Nadie puede
+            habilitarse a sí mismo y cada cambio de rol queda asentado en auditoría.
+          </p>
+        </div>
+      )}
 
       {/* ── Pendientes ─────────────────────────────────────────────────── */}
       {permisos.configura && (
