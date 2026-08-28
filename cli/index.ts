@@ -15,6 +15,8 @@ import { propuestaDocx, informeDocx as proyectoInformeDocx } from './proyecto-do
 import { desplegar } from './desplegar'
 import { leerMemoria } from './memoria'
 import { textoDelPdf, bloques, cruzar } from './enriquecer'
+import { leerFormato, fechaFormato, anioFormato, horasFormato } from './formato'
+import { readdirSync, statSync } from 'node:fs'
 
 const [, , comando = '', ...resto] = process.argv
 const args = argumentos(resto)
@@ -58,6 +60,8 @@ const AYUDA = `
     memoria:enriquecer --archivo "Memoria 2025 FCJS UNIDA.pdf" --anio 2025
                      [--umbral 0.5] [--dry-run]
                      # cruza el texto completo del PDF con los proyectos cargados
+    proyecto:importar --archivo "Informe de Proyecto.docx"   # formato oficial 9 o 10
+    proyecto:importar --carpeta ./proyectos [--dry-run]      # todos los .docx de una carpeta
     proyecto:listar
     proyecto:exportar --id <uuid> [--informe <uuid>] [--salida archivo.docx]
 
@@ -552,6 +556,91 @@ async function main(): Promise<void> {
       if (e2) fatal(e2.message)
       const rr = r as Record<string, number>
       console.log(`\n  ${rr.enriquecidos} proyectos enriquecidos con el texto de la memoria.\n`)
+      break
+    }
+
+    case 'proyecto:importar': {
+      const rutas: string[] = []
+      if (typeof args.carpeta === 'string') {
+        for (const f of readdirSync(args.carpeta)) {
+          if (f.toLowerCase().endsWith('.docx') && !f.startsWith('~$')) {
+            rutas.push(`${args.carpeta}/${f}`)
+          }
+        }
+      } else {
+        const [archivo] = exigir(args, 'archivo')
+        rutas.push(archivo)
+      }
+      if (rutas.length === 0) fatal('No encontré documentos .docx.')
+
+      const leidos = []
+      for (const r of rutas) {
+        try {
+          const p = leerFormato(r)
+          // Un documento sin nombre de proyecto ni estudiantes ni líder no es
+          // el formulario oficial: probablemente sea un anexo o una galería.
+          if (!p.campos.nombre && p.estudiantes.length === 0 && !p.campos.lider) {
+            console.log(`  ${p.archivo}: no parece el formulario oficial, se omite.`)
+            continue
+          }
+          leidos.push(p)
+        } catch (e) {
+          console.log(`  ${r.split('/').pop()}: ${(e as Error).message}`)
+        }
+      }
+      console.log(`\n  ${leidos.length} documentos reconocidos de ${rutas.length}.\n`)
+
+      for (const p of leidos) {
+        const est = p.estudiantes.length
+        console.log(`  [formato ${p.formato}] ${p.nombre.slice(0, 62)}`)
+        console.log(`      ${anioFormato(p) ?? '—'} · ${est} estudiantes ` +
+                    `(${p.estudiantes.filter((e) => e.cedula).length} con documento) · ` +
+                    `${p.docentes.length} docentes · ${p.externos.length} externos`)
+      }
+
+      if (args['dry-run'] === true) {
+        console.log('\n  Simulación: no se cargó nada. Quite --dry-run para importar.\n')
+        break
+      }
+
+      const db = await comoOperador()
+      let altas = 0, actualizados = 0, estudiantes = 0
+      for (const p of leidos) {
+        const { data, error } = await db.rpc('proyecto_desde_formato', {
+          p_datos: {
+            archivo: p.archivo, formato: p.formato, nombre: p.nombre,
+            anio: anioFormato(p) ?? null,
+            fecha_inicio: fechaFormato(p.campos.fecha_inicio) ?? null,
+            fecha_fin: fechaFormato(p.campos.fecha_fin) ?? null,
+            carreras: p.campos.carreras ?? null,
+            curso: p.campos.curso ?? null,
+            localizacion: p.campos.localizacion ?? null,
+            otras_organizaciones: p.campos.otras_organizaciones ?? null,
+            lider: p.campos.lider ?? p.campos.elaborado_por ?? null,
+            entregable: p.campos.entregable ?? null,
+            proyectos_relacionados: p.campos.proyectos_relacionados ?? null,
+            horas_reloj: horasFormato(p.campos.tiempo_total),
+            estado: p.formato === 10 ? 'finalizado' : 'aprobado',
+            docentes: p.docentes.map((d) => ({ nombre: d, rol: 'responsable' })),
+            externos: p.externos.map((e) => ({ nombre: e })),
+            estudiantes: p.estudiantes,
+            propuesta: {
+              introduccion: p.campos.introduccion ?? null,
+              justificacion: p.campos.justificacion ?? null,
+              objetivo_general: p.campos.objetivo_general ?? null,
+              metodologia: p.campos.metodologia ?? null,
+              detalle: p.texto.slice(0, 6000),
+              fuente_correo: p.archivo,
+            },
+          },
+        })
+        if (error) { console.log(`  ${p.archivo}: ${error.message}`); continue }
+        const r = data as Record<string, unknown>
+        if (r.nuevo) altas++; else actualizados++
+        estudiantes += Number(r.estudiantes ?? 0)
+      }
+      console.log(`\n  ${altas} proyectos nuevos, ${actualizados} actualizados.`)
+      console.log(`  ${estudiantes} estudiantes cargados como participantes.\n`)
       break
     }
 
