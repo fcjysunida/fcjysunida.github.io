@@ -132,7 +132,7 @@ src/data/          Repositorios: publico.ts (anónimo) y panel.ts (con sesión)
 src/lib/           Tipos, formato, campos, sesión, cliente de Supabase, datos institucionales
 supabase/migrations/  Esquema, RLS, funciones, encuesta, indicadores, tareas programadas
 cli/               Operación desde la línea de comandos
-docs/              Arquitectura, seguridad, consentimiento, informe DTC, padrón, despliegue
+docs/              Arquitectura, seguridad, consentimiento, informe DTC, padrón, correo, despliegue
 ```
 
 ## Operación desde Claude Code
