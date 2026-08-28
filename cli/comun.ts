@@ -34,21 +34,39 @@ export function fatal(mensaje: string): never {
 }
 
 async function preguntar(texto: string, oculto = false): Promise<string> {
-  const rl = createInterface({ input: stdin, output: stdout, terminal: true })
-  if (oculto) {
-    // Silencia el eco para que la contraseña no quede en pantalla ni en el historial.
-    const escribir = (stdout as unknown as { write: (s: string) => boolean }).write.bind(stdout)
-    ;(stdout as unknown as { write: (s: string) => boolean }).write = (s: string) =>
-      (s.includes(texto) ? escribir(s) : true)
+  if (!oculto) {
+    const rl = createInterface({ input: stdin, output: stdout, terminal: true })
     const v = await rl.question(texto)
-    ;(stdout as unknown as { write: (s: string) => boolean }).write = escribir
-    stdout.write('\n')
     rl.close()
     return v
   }
-  const v = await rl.question(texto)
-  rl.close()
-  return v
+  // Lectura sin eco. No se usa readline: redibuja la línea entera —el prompt
+  // incluido— en cada tecla, así que cualquier filtro sobre lo que se escribe
+  // termina dejando pasar la contraseña. Acá se lee stdin en crudo y no se
+  // imprime nada de lo tecleado.
+  return new Promise<string>((resolve, reject) => {
+    stdout.write(texto)
+    const crudoAntes = stdin.isRaw === true
+    stdin.setRawMode?.(true)
+    stdin.resume()
+    stdin.setEncoding('utf8')
+    let buffer = ''
+    const cerrar = () => {
+      stdin.removeListener('data', alTeclear)
+      stdin.setRawMode?.(crudoAntes)
+      stdin.pause()
+      stdout.write('\n')
+    }
+    const alTeclear = (trozo: string) => {
+      for (const c of trozo) {
+        if (c === '\r' || c === '\n' || c === '\u0004') { cerrar(); resolve(buffer); return }
+        if (c === '\u0003') { cerrar(); reject(new Error('Cancelado.')); return }
+        if (c === '\u007f' || c === '\b') { buffer = buffer.slice(0, -1); continue }
+        if (c >= ' ') buffer += c
+      }
+    }
+    stdin.on('data', alTeclear)
+  })
 }
 
 /**

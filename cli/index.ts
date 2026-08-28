@@ -326,6 +326,7 @@ async function main(): Promise<void> {
         const simulacion = args['dry-run'] === true
         const db = simulacion ? null : await comoOperador()
         let totalCargadas = 0
+        const fallidos: string[] = []
 
         for (const f of archivos) {
           const per = f.replace(/\.(xls|xlsx|csv)$/i, '').trim()
@@ -338,21 +339,37 @@ async function main(): Promise<void> {
           console.log(`\n  ${per}: ${leidas} filas, ${filas.length} con nombre y documento.`)
           if (simulacion || filas.length === 0) continue
 
+          let fallo = ''
+          let actualizadas = 0, completados = 0
           for (let i = 0; i < filas.length; i += 400) {
             const { data, error } = await db!.rpc('padron_importar', {
               p_periodo: per, p_condicion: cond, p_filas: filas.slice(i, i + 400),
             })
-            if (error) fatal(`${per}: ${error.message}`)
-            totalCargadas += Number((data as Record<string, number>).procesadas ?? 0)
+            // Un período que falla no cancela la tanda: se informa y se sigue.
+            if (error) { fallo = error.message; break }
+            const r = data as Record<string, number>
+            totalCargadas += Number(r.procesadas ?? 0)
+            actualizadas += Number(r.filas_actualizadas ?? 0)
+            completados += Number(r.documentos_completados ?? 0)
           }
-          console.log(`  ${per}: cargado.`)
+          if (fallo) { fallidos.push(`${per}: ${fallo}`); console.log(`  ${per}: ${fallo}`) }
+          else {
+            console.log(`  ${per}: cargado` +
+              (actualizadas > 0 ? `, ${actualizadas} filas actualizadas` : '') +
+              (completados > 0 ? `, ${completados} documentos completados` : '') + '.')
+          }
         }
 
         if (simulacion) {
           console.log('\n  Simulación: no se cargó nada. Quite --dry-run para importar.\n')
           break
         }
-        console.log(`\n  ${totalCargadas} registros cargados en ${archivos.length} períodos.`)
+        console.log(`\n  ${totalCargadas} registros cargados en ` +
+                    `${archivos.length - fallidos.length} de ${archivos.length} períodos.`)
+        if (fallidos.length > 0) {
+          console.log(`\n  ${fallidos.length} períodos con error:`)
+          for (const f of fallidos) console.log(`    ${f}`)
+        }
         const { data: v } = await db!.rpc('padron_vincular_por_matricula')
         const vv = v as Record<string, number>
         console.log(`  Vinculación por matrícula: ${vv?.vinculadas ?? 0} completadas.`)
