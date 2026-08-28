@@ -314,3 +314,39 @@ export const activarUsuario = (id: string, activo: boolean) =>
 
 export const confirmarCorreo = (id: string) =>
   rpc<{ ok: boolean }>('usuario_confirmar_correo', { p_id: id })
+
+// ── Redacción asistida del informe ───────────────────────────────────────────
+export interface BorradorInforme {
+  resumen: string
+  metodologia: string
+  conclusiones: string
+  analisis: { fila: string; planteado: string; alcanzado: string }[]
+  plan: { actividad: string; responsables: string; cronograma: string }[]
+  metas: { meta: string; indicadores: string; recursos: string }[]
+  faltantes: string[]
+}
+
+/** Pide un borrador del informe. Devuelve texto para revisar, no para publicar. */
+export async function redactarInforme(proyectoId: string): Promise<BorradorInforme> {
+  const { data: sesion } = await supabase.auth.getSession()
+  const token = sesion.session?.access_token
+  if (!token) throw new Error('La sesión expiró. Vuelva a entrar.')
+
+  const r = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/redactar-informe`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ proyecto_id: proyectoId }),
+    },
+  )
+  const cuerpo = await r.json().catch(() => ({}))
+  if (!r.ok || !cuerpo?.ok) {
+    throw new Error(cuerpo?.error ?? 'No pudimos redactar el borrador.')
+  }
+  return cuerpo.borrador as BorradorInforme
+}

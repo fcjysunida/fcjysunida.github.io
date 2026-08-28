@@ -1,15 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { listarProyectos, guardarProyecto } from '../data/panel'
-import type { ProyectoResumen } from '../lib/tipos'
-import { etiquetaClasificacion, etiquetaEstadoProyecto } from '../lib/proyecto'
+import type { ProyectoResumen, ClasificacionProyecto } from '../lib/tipos'
+import { CLASIFICACIONES, etiquetaClasificacion, etiquetaEstadoProyecto } from '../lib/proyecto'
 import { fechaCorta, numero, hoyAsuncion } from '../lib/formato'
 import { usePermisos } from '../lib/sesion'
 import { Cargando, Aviso, Dato } from '../ui/piezas'
 
+const TODOS = '—todos—'
+
 export default function Proyectos() {
   const [filas, setFilas] = useState<ProyectoResumen[] | null>(null)
   const [error, setError] = useState('')
+  const [anio, setAnio] = useState(TODOS)
+  const [categoria, setCategoria] = useState(TODOS)
+  const [clasificacion, setClasificacion] = useState(TODOS)
+  const [busca, setBusca] = useState('')
   const permisos = usePermisos()
   const ir = useNavigate()
 
@@ -17,11 +23,39 @@ export default function Proyectos() {
     listarProyectos().then(setFilas).catch((e: Error) => setError(e.message))
   }, [])
 
+  const anios = useMemo(() => {
+    const s = new Set<number>()
+    for (const p of filas ?? []) {
+      const a = p.anio ?? (p.fecha_inicio ? Number(p.fecha_inicio.slice(0, 4)) : null)
+      if (a) s.add(a)
+    }
+    return [...s].sort((a, b) => b - a)
+  }, [filas])
+
+  const categorias = useMemo(() => {
+    const s = new Set<string>()
+    for (const p of filas ?? []) if (p.categoria_memoria) s.add(p.categoria_memoria)
+    return [...s].sort()
+  }, [filas])
+
+  const visibles = useMemo(() => {
+    const q = busca.trim().toLowerCase()
+    return (filas ?? []).filter((p) => {
+      const a = p.anio ?? (p.fecha_inicio ? Number(p.fecha_inicio.slice(0, 4)) : null)
+      if (anio !== TODOS && String(a) !== anio) return false
+      if (categoria !== TODOS && p.categoria_memoria !== categoria) return false
+      if (clasificacion !== TODOS && p.clasificacion !== clasificacion) return false
+      if (q && !`${p.nombre} ${p.lider ?? ''} ${p.carreras ?? ''}`.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [filas, anio, categoria, clasificacion, busca])
+
   async function crear() {
     try {
       const id = await guardarProyecto({
         nombre: 'Proyecto sin título', clasificacion: 'cursos_extracurriculares',
-        estado: 'borrador', fecha_inicio: hoyAsuncion(), propuesta: {},
+        estado: 'borrador', fecha_inicio: hoyAsuncion(),
+        anio: Number(hoyAsuncion().slice(0, 4)), fuente: 'carga manual', propuesta: {},
       })
       ir(`/admin/proyectos/${id}`)
     } catch (e) { setError((e as Error).message) }
@@ -30,8 +64,8 @@ export default function Proyectos() {
   if (error) return <Aviso>{error}</Aviso>
   if (!filas) return <Cargando />
 
-  const horas = filas.reduce((t, p) => t + Number(p.horas_extension), 0)
-  const benef = filas.reduce((t, p) => t + Number(p.beneficiarios_directos), 0)
+  const conInforme = filas.filter((p) => p.informes > 0).length
+  const conFecha = filas.filter((p) => p.fecha_inicio).length
 
   return (
     <div>
@@ -45,60 +79,98 @@ export default function Proyectos() {
           <button className="btn btn-primary" onClick={() => void crear()}>Nuevo proyecto</button>
         )}
       </div>
-      <p style={{ maxWidth: '74ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
+      <p style={{ maxWidth: '76ch', color: 'var(--tenue-2)', margin: '14px 0 0' }}>
         La propuesta sigue el formato «9. Propuesta de Proyecto de Extensión Universitaria» y el
-        informe final, el formato «10. Informe de Proyecto de Extensión Universitaria». Ambos se
-        exportan en Word con la estructura y el orden de los formularios oficiales.
+        informe final, el formato «10». Ambos se exportan en Word. Las actividades de las
+        memorias 2021–2025 están cargadas como proyectos finalizados: sirven de historial y de
+        base para redactar los informes que falten.
       </p>
 
       <hr className="rule-strong" style={{ margin: '30px 0 28px' }} />
 
-      <div className="fc-grid" style={{ marginBottom: 34 }}>
+      <div className="fc-grid" style={{ marginBottom: 30 }}>
         <Dato label="Proyectos" valor={numero(filas.length)}
-              nota={`${filas.filter((p) => p.estado === 'finalizado').length} finalizados`} />
-        <Dato label="Horas de extensión" valor={numero(horas)} nota="según la escala del anexo" />
-        <Dato label="Beneficiarios directos" valor={numero(benef)} nota="declarados en las propuestas" />
-        <Dato label="Informes presentados"
-              valor={numero(filas.reduce((t, p) => t + Number(p.informes), 0))}
-              nota={`${filas.filter((p) => p.informes === 0).length} proyectos sin informe`} />
+              nota={`${anios.length} años, de ${anios[anios.length - 1] ?? '—'} a ${anios[0] ?? '—'}`} />
+        <Dato label="Con fecha exacta" valor={numero(conFecha)}
+              nota={`${filas.length - conFecha} documentados solo por año`} />
+        <Dato label="Con informe" valor={numero(conInforme)}
+              nota={`${filas.length - conInforme} sin informe cargado`} />
+        <Dato label="Horas de extensión"
+              valor={numero(filas.reduce((t, p) => t + Number(p.horas_extension), 0))}
+              nota="según la escala del anexo" />
       </div>
 
-      <hr className="rule" />
+      {/* ── Filtros ────────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end',
+                    borderTop: '1px solid var(--regla)', paddingTop: 18 }}>
+        <Filtro etiqueta="Año" valor={anio} onChange={setAnio}
+                opciones={anios.map((a) => [String(a), String(a)])} />
+        {categorias.length > 0 && (
+          <Filtro etiqueta="Categoría" valor={categoria} onChange={setCategoria}
+                  opciones={categorias.map((c) => [c, c])} ancho={190} />
+        )}
+        <Filtro etiqueta="Clasificación" valor={clasificacion}
+                onChange={(v) => setClasificacion(v as ClasificacionProyecto | typeof TODOS)}
+                opciones={CLASIFICACIONES.map((c) => [c.id, c.label])} ancho={230} />
+        <div className="field" style={{ minWidth: 200 }}>
+          <label htmlFor="p-busca">Buscar</label>
+          <input id="p-busca" className="input input-linea" value={busca}
+                 placeholder="Nombre, responsable o carrera"
+                 onChange={(e) => setBusca(e.target.value)} />
+        </div>
+        {(anio !== TODOS || categoria !== TODOS || clasificacion !== TODOS || busca) && (
+          <button className="btn btn-ghost" onClick={() => {
+            setAnio(TODOS); setCategoria(TODOS); setClasificacion(TODOS); setBusca('')
+          }}>Limpiar</button>
+        )}
+      </div>
 
-      {filas.length === 0 ? (
-        <p className="tenue" style={{ marginTop: 24 }}>
-          Todavía no hay proyectos cargados.
-          {permisos.creaActividad ? ' Cree el primero con el botón de arriba.' : ''}
-        </p>
+      <p style={{ fontSize: 13, color: 'var(--tenue)', margin: '14px 0 6px' }}>
+        {visibles.length === filas.length
+          ? `${numero(filas.length)} proyectos`
+          : `${numero(visibles.length)} de ${numero(filas.length)} proyectos`}
+      </p>
+
+      {visibles.length === 0 ? (
+        <p className="tenue" style={{ marginTop: 20 }}>Ningún proyecto coincide con ese filtro.</p>
       ) : (
-        <div className="fc-scroll" style={{ marginTop: 8 }}>
-          <table className="table" style={{ minWidth: 960 }}>
+        <div className="fc-scroll">
+          <table className="table" style={{ minWidth: 940 }}>
             <thead>
               <tr>
-                <th>Proyecto</th><th>Clasificación</th><th>Período</th><th>Fechas</th>
+                <th style={{ width: 62 }}>Año</th>
+                <th>Proyecto</th><th>Clasificación</th><th>Categoría</th>
+                <th>Fecha</th>
                 <th style={{ textAlign: 'right' }}>Horas EU</th>
-                <th style={{ textAlign: 'right' }}>Estud.</th>
-                <th style={{ textAlign: 'right' }}>Benef.</th>
                 <th>Informe</th><th>Estado</th>
               </tr>
             </thead>
             <tbody>
-              {filas.map((p) => (
+              {visibles.map((p) => (
                 <tr key={p.id}>
-                  <td className="obra" style={{ maxWidth: '32ch' }}>
+                  <td className="numeral" style={{ fontFamily: 'var(--serif)', fontSize: 16 }}>
+                    {p.anio ?? (p.fecha_inicio ? p.fecha_inicio.slice(0, 4) : '—')}
+                  </td>
+                  <td className="obra" style={{ maxWidth: '42ch' }}>
                     <Link to={`/admin/proyectos/${p.id}`}>{p.nombre}</Link>
                   </td>
                   <td style={{ fontSize: 13 }}>{etiquetaClasificacion(p.clasificacion)}</td>
-                  <td style={{ fontSize: 13 }}>{p.periodo_academico ?? '—'}</td>
-                  <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
-                    {p.fecha_inicio ? fechaCorta(p.fecha_inicio) : '—'}
+                  <td style={{ fontSize: 13, color: 'var(--tenue)' }}>
+                    {p.categoria_memoria ?? '—'}
                   </td>
-                  <td className="numeral" style={{ textAlign: 'right' }}>{p.horas_extension}</td>
-                  <td className="numeral" style={{ textAlign: 'right' }}>{p.estudiantes}</td>
-                  <td className="numeral" style={{ textAlign: 'right' }}>{p.beneficiarios_directos}</td>
+                  <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                    {p.fecha_inicio
+                      ? fechaCorta(p.fecha_inicio)
+                      : <span className="tenue" title="La memoria documenta solo el año">
+                          sin fecha exacta
+                        </span>}
+                  </td>
+                  <td className="numeral" style={{ textAlign: 'right' }}>
+                    {p.horas_extension || '—'}
+                  </td>
                   <td style={{ fontSize: 13 }}>
                     {p.informes > 0
-                      ? `${p.informes} — ${p.ultimo_informe ? fechaCorta(p.ultimo_informe) : ''}`
+                      ? `${p.informes}${p.ultimo_informe ? ` — ${fechaCorta(p.ultimo_informe)}` : ''}`
                       : <span style={{ color: 'var(--rojo-oscuro)' }}>pendiente</span>}
                   </td>
                   <td style={{ fontSize: 13 }}>{etiquetaEstadoProyecto(p.estado)}</td>
@@ -108,6 +180,25 @@ export default function Proyectos() {
           </table>
         </div>
       )}
+    </div>
+  )
+}
+
+function Filtro({
+  etiqueta, valor, onChange, opciones, ancho = 150,
+}: {
+  etiqueta: string; valor: string; onChange: (v: string) => void
+  opciones: [string, string][]; ancho?: number
+}) {
+  const id = `f-${etiqueta.toLowerCase()}`
+  return (
+    <div className="field" style={{ width: ancho }}>
+      <label htmlFor={id}>{etiqueta}</label>
+      <select id={id} className="input input-linea" value={valor}
+              onChange={(e) => onChange(e.target.value)}>
+        <option value={TODOS}>Todos</option>
+        {opciones.map(([v, r]) => <option key={v} value={v}>{r}</option>)}
+      </select>
     </div>
   )
 }

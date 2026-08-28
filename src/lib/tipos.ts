@@ -298,6 +298,9 @@ export interface Proyecto {
   proyectos_relacionados: string | null
   fecha_inicio: string | null
   fecha_fin: string | null
+  anio: number | null
+  categoria_memoria: string | null
+  fuente: string | null
   horas_reloj: number
   horas_extension: number
   beneficiarios_directos: number
@@ -318,6 +321,10 @@ export interface ProyectoResumen {
   lider: string | null
   fecha_inicio: string | null
   fecha_fin: string | null
+  /** Año de la actividad. Se usa cuando solo se documentó el año. */
+  anio: number | null
+  categoria_memoria: string | null
+  fuente: string | null
   horas_reloj: number
   horas_extension: number
   beneficiarios_directos: number

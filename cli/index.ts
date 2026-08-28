@@ -13,6 +13,7 @@ import type { DatosInforme } from './informe'
 import { leerPlanilla } from './planilla'
 import { propuestaDocx, informeDocx as proyectoInformeDocx } from './proyecto-docx'
 import { desplegar } from './desplegar'
+import { leerMemoria } from './memoria'
 
 const [, , comando = '', ...resto] = process.argv
 const args = argumentos(resto)
@@ -51,6 +52,8 @@ const AYUDA = `
     certificados:listar --actividad <uuid>
 
   Proyectos de extensión
+    memoria:importar --archivo "Memoria_Extension_UNIDA_2021-2025.docx" [--dry-run]
+                     # carga las actividades de la memoria como proyectos
     proyecto:listar
     proyecto:exportar --id <uuid> [--informe <uuid>] [--salida archivo.docx]
 
@@ -442,6 +445,63 @@ async function main(): Promise<void> {
     }
 
     // ── Proyectos de extensión ───────────────────────────────────────────────
+    case 'memoria:importar': {
+      const [archivo] = exigir(args, 'archivo')
+      console.log(`\n  Leyendo ${archivo}…`)
+      const acts = leerMemoria(archivo)
+      if (acts.length === 0) fatal('No encontré tablas de actividades en ese documento.')
+
+      const porAnio = new Map<number, number>()
+      const porCat = new Map<string, number>()
+      const porClas = new Map<string, number>()
+      for (const a of acts) {
+        porAnio.set(a.anio, (porAnio.get(a.anio) ?? 0) + 1)
+        porCat.set(a.categoria, (porCat.get(a.categoria) ?? 0) + 1)
+        porClas.set(a.clasificacion, (porClas.get(a.clasificacion) ?? 0) + 1)
+      }
+      console.log(`  ${acts.length} actividades.`)
+      console.log(`  Por año:       ${[...porAnio.entries()].sort()
+        .map(([k, v]) => `${k}: ${v}`).join('  ')}`)
+      console.log(`  Por categoría: ${[...porCat.entries()]
+        .map(([k, v]) => `${k}: ${v}`).join('  ')}`)
+      console.log(`  Clasificación: ${[...porClas.entries()].sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `${k}: ${v}`).join('  ')}`)
+      console.log(`  Con fecha exacta: ${acts.filter((a) => a.fecha).length}` +
+                  ` (el resto queda con el año, sin fecha inventada)`)
+
+      if (args['dry-run'] === true) {
+        console.log('\n  Ejemplos:')
+        for (const a of acts.slice(0, 3)) {
+          console.log(`    ${a.anio} · ${a.clasificacion} · ${a.nombre.slice(0, 70)}`)
+        }
+        console.log('\n  Simulación: no se cargó nada. Quite --dry-run para importar.\n')
+        break
+      }
+
+      const db = await comoOperador()
+      const LOTE = 50
+      let altas = 0, actualizados = 0, total = 0
+      for (let i = 0; i < acts.length; i += LOTE) {
+        const { data, error } = await db.rpc('proyectos_importar', {
+          p_filas: acts.slice(i, i + LOTE).map((a) => ({
+            nombre: a.nombre, anio: a.anio, fecha: a.fecha ?? null,
+            descripcion: a.descripcion, clasificacion: a.clasificacion,
+            categoria: a.categoria,
+          })),
+          p_fuente: archivo.split('/').pop() ?? archivo,
+        })
+        if (error) fatal(error.message)
+        const r = data as Record<string, number>
+        altas += Number(r.altas ?? 0)
+        actualizados += Number(r.actualizados ?? 0)
+        total = Number(r.total ?? 0)
+        process.stdout.write(`\r  Cargando… ${altas + actualizados}/${acts.length}`)
+      }
+      console.log(`\n\n  ${altas} proyectos nuevos, ${actualizados} actualizados.`)
+      console.log(`  La base tiene ahora ${total} proyectos.\n`)
+      break
+    }
+
     case 'proyecto:listar': {
       const db = await comoOperador()
       const { data, error } = await db.from('proyectos_resumen')

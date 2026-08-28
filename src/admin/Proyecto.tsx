@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import {
   traerProyecto, guardarProyecto, participantesDe, guardarParticipantes,
   informesDe, guardarInforme, horasSugeridas, listarPeriodos, listarActividades,
+  redactarInforme,
 } from '../data/panel'
 import type {
   Proyecto as TProyecto, Propuesta, ParticipanteProyecto, InformeProyecto,
@@ -468,7 +469,10 @@ function EditorInforme({
 }: { informe: InformeProyecto; proyecto: TProyecto; alCerrar: () => void }) {
   const [i, setI] = useState(informe)
   const [aviso, setAviso] = useState('')
+  const [error, setError] = useState('')
   const [sucio, setSucio] = useState(false)
+  const [redactando, setRedactando] = useState(false)
+  const [faltantes, setFaltantes] = useState<string[]>([])
 
   const set = <K extends keyof InformeProyecto>(k: K, v: InformeProyecto[K]) => {
     setI((s) => ({ ...s, [k]: v })); setSucio(true)
@@ -485,6 +489,27 @@ function EditorInforme({
     } catch (e) { setAviso((e as Error).message) }
   }
 
+  async function redactar() {
+    if (i.resumen?.trim() || i.conclusiones?.trim()) {
+      if (!window.confirm(
+        'El borrador reemplaza el resumen, la metodología, las conclusiones y los tres ' +
+        'cuadros de este informe.\n\n¿Continuar?')) return
+    }
+    setError(''); setAviso(''); setRedactando(true); setFaltantes([])
+    try {
+      const b = await redactarInforme(proyecto.id)
+      setI((s) => ({
+        ...s,
+        resumen: b.resumen, metodologia: b.metodologia, conclusiones: b.conclusiones,
+        informe: { ...s.informe, analisis: b.analisis, plan: b.plan, metas: b.metas },
+      }))
+      setFaltantes(b.faltantes ?? [])
+      setSucio(true)
+      setAviso('Borrador generado. Revíselo y corrija antes de guardar: es un punto de ' +
+               'partida, no un informe terminado.')
+    } catch (e) { setError((e as Error).message) } finally { setRedactando(false) }
+  }
+
   const b = i.informe ?? {}
 
   return (
@@ -492,14 +517,36 @@ function EditorInforme({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     gap: 16, flexWrap: 'wrap', marginTop: 20 }}>
         <h2 style={{ fontSize: 25 }}>Informe de proyecto de extensión universitaria</h2>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => void redactar()}
+                  disabled={redactando}>
+            {redactando ? 'Redactando…' : 'Redactar un borrador'}
+          </button>
           <button className="btn btn-primary" onClick={() => void guardar()} disabled={!sucio}>
             Guardar
           </button>
           <button className="btn btn-secondary" onClick={alCerrar}>Volver</button>
         </div>
       </div>
+      <p className="bloque-nota" style={{ maxWidth: '76ch', marginTop: 10 }}>
+        La redacción asistida arma un borrador con la estructura del formato oficial a partir
+        de la propuesta cargada y, si el proyecto está vinculado a una actividad, de las cifras
+        reales de inscripción, asistencia y satisfacción. <strong>No inventa datos</strong>: lo
+        que falta lo deja señalado. El informe lo firma el docente, así que revise todo antes
+        de guardar.
+      </p>
+      <Aviso>{error}</Aviso>
       <Aviso tono="nota">{aviso}</Aviso>
+      {faltantes.length > 0 && (
+        <div style={{ borderLeft: '3px solid var(--rojo)', padding: '10px 0 10px 14px',
+                      margin: '14px 0' }}>
+          <strong style={{ fontSize: 14 }}>Datos que faltan y debe completar:</strong>
+          <ul style={{ margin: '8px 0 0', paddingLeft: 20, fontSize: 14,
+                       color: 'var(--tenue-2)' }}>
+            {faltantes.map((f, n) => <li key={n}>{f}</li>)}
+          </ul>
+        </div>
+      )}
 
       <Bloque titulo="Datos informativos">
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr' }}>
