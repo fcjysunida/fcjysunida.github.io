@@ -46,6 +46,7 @@ const AYUDA = `
     periodo:crear --codigo 2025-1 --desde 2025-02-01 --hasta 2025-07-31
     padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1
     padron:importar --carpeta "./Alumnos UNIDA"            # el período sale del nombre
+    padron:importar --carpeta "./Alumnos UNIDA" --reconciliar  # además borra lo que sobra
                     [--condicion estudiante|egresado] [--dry-run]
                     [--col-nombre N --col-cedula N --col-matricula N]   # si no los detecta
     padron:resumen
@@ -357,6 +358,22 @@ async function main(): Promise<void> {
             console.log(`  ${per}: cargado` +
               (actualizadas > 0 ? `, ${actualizadas} filas actualizadas` : '') +
               (completados > 0 ? `, ${completados} documentos completados` : '') + '.')
+
+            // --reconciliar deja el período exactamente como la planilla:
+            // borra lo que una carga anterior dejó y esta nómina ya no incluye.
+            if (args.reconciliar === true) {
+              const { data: rec, error: eRec } = await db!.rpc('padron_reconciliar', {
+                p_periodo: per,
+                p_matriculas: filas.map((f) => f.matricula).filter(Boolean),
+                p_documentos: filas.map((f) => f.cedula).filter(Boolean),
+                p_dry_run: false,
+              })
+              if (eRec) console.log(`  ${per}: reconciliación no aplicada — ${eRec.message}`)
+              else {
+                const n = Number((rec as Record<string, number>).eliminadas ?? 0)
+                if (n > 0) console.log(`  ${per}: ${n} filas eliminadas por no estar en la planilla.`)
+              }
+            }
           }
         }
 
