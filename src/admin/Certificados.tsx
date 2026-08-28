@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   certificadosDe, emitirCertificados, anularCertificado, listarPlantillas,
+  avisarCertificados,
 } from '../data/panel'
 import type { Certificado, PlantillaCertificado, RolCertificado } from '../lib/tipos'
 import { fechaHora, descargarCSV, numero } from '../lib/formato'
@@ -123,6 +124,35 @@ export default function Certificados() {
                     gap: 16, flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: 25 }}>Emitidas</h2>
         {(filas?.length ?? 0) > 0 && (
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+          <Link className="btn btn-secondary" style={{ fontSize: 13 }}
+                to={`/admin/certificados/imprimir?a=${id}`}>
+            Imprimir todas en PDF
+          </Link>
+          {permisos.exporta && (
+            <button className="btn btn-ghost" disabled={trabajando}
+                    onClick={() => {
+                      void avisarCertificados(id, true).then((r) => {
+                        if (r.a_enviar === 0) {
+                          setAviso(`No hay avisos pendientes. ${r.ya_avisados} ya se enviaron` +
+                                   (r.sin_correo_valido > 0
+                                     ? `, ${r.sin_correo_valido} sin correo válido.` : '.'))
+                          return
+                        }
+                        if (!window.confirm(
+                          `Se enviará el aviso de constancia a ${r.a_enviar} personas.\n` +
+                          `${r.ya_avisados} ya lo recibieron` +
+                          (r.sin_correo_valido > 0
+                            ? ` y ${r.sin_correo_valido} no tienen correo válido` : '') +
+                          '.\n\nEl correo no se puede desenviar. ¿Autoriza el envío?')) return
+                        void avisarCertificados(id, false)
+                          .then((f) => { setAviso(`${f.a_enviar} avisos encolados.`); cargar() })
+                          .catch((e: Error) => setAviso(e.message))
+                      }).catch((e: Error) => setAviso(e.message))
+                    }}>
+              Autorizar el aviso por correo
+            </button>
+          )}
           <button className="btn btn-ghost" onClick={() => descargarCSV(
             `constancias-${actividad?.titulo.slice(0, 40) ?? id}`,
             (filas ?? []).map((c) => ({
@@ -130,9 +160,11 @@ export default function Certificados() {
               jornadas: c.jornadas, correo: c.email,
               enlace: `${basePublica()}/c/${c.codigo}`,
               estado: c.anulado_en ? 'anulada' : 'vigente',
+              aviso: c.aviso_enviado_en ? 'enviado' : 'pendiente',
             })))}>
             Exportar el listado
           </button>
+          </div>
         )}
       </div>
 
@@ -152,7 +184,7 @@ export default function Certificados() {
                   <th>Código</th><th>Nombre</th><th>Rol</th>
                   <th style={{ textAlign: 'right' }}>Horas</th>
                   <th style={{ textAlign: 'right' }}>Jorn.</th>
-                  <th>Emitida</th><th>Estado</th><th />
+                  <th>Emitida</th><th>Estado</th><th>Aviso</th><th />
                 </tr>
               </thead>
               <tbody>
@@ -168,6 +200,9 @@ export default function Certificados() {
                     <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{fechaHora(c.emitido_en)}</td>
                     <td style={{ fontSize: 13, color: c.anulado_en ? 'var(--rojo-oscuro)' : undefined }}>
                       {c.anulado_en ? 'Anulada' : 'Vigente'}
+                    </td>
+                    <td style={{ fontSize: 13, color: 'var(--tenue)' }}>
+                      {c.aviso_enviado_en ? 'enviado' : '—'}
                     </td>
                     <td>
                       {!c.anulado_en && permisos.creaActividad && (

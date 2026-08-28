@@ -412,3 +412,29 @@ export async function quitarParticipante(id: string): Promise<void> {
   const { error } = await supabase.from('proyecto_participantes').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+/** Constancias con todo lo necesario para imprimirlas sin volver a consultar. */
+export interface CertificadoImprimible {
+  codigo: string
+  nombre: string
+  evento: string
+  fecha_texto: string
+  horas: number
+  jornadas: number
+  rol: string
+  modalidad: string
+  lugar: string | null
+  emitido_en: string
+  cuerpo_html: string
+  fondo_url: string | null
+  orientacion: 'horizontal' | 'vertical'
+}
+
+export const certificadosImprimibles = (actividadId: string, soloPendientes = false) =>
+  rpc<CertificadoImprimible[]>('certificados_imprimibles',
+    { p_actividad: actividadId, p_solo_sin_aviso: soloPendientes })
+
+export const avisarCertificados = (actividadId: string, simulacion: boolean) =>
+  rpc<{ ok: boolean; simulacion: boolean; a_enviar: number; ya_avisados: number;
+        sin_correo_valido: number }>(
+    'avisar_certificados', { p_actividad: actividadId, p_solo_simulacion: simulacion })

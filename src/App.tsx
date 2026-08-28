@@ -23,6 +23,7 @@ import Proyectos from './admin/Proyectos'
 import Proyecto from './admin/Proyecto'
 import Ajustes from './admin/Ajustes'
 import Usuarios from './admin/Usuarios'
+import ImprimirConstancias from './admin/ImprimirConstancias'
 import Seguridad from './admin/Seguridad'
 import { Cargando } from './ui/piezas'
 
@@ -64,6 +65,8 @@ export default function App() {
           <Route path="/admin/proyectos/:id" element={<Protegido><Proyecto /></Protegido>} />
           <Route path="/admin/ajustes"      element={<Protegido><Ajustes /></Protegido>} />
           <Route path="/admin/usuarios"     element={<Protegido><Usuarios /></Protegido>} />
+          <Route path="/admin/certificados/imprimir"
+                 element={<Protegido><ImprimirConstancias /></Protegido>} />
           <Route path="/admin/seguridad"    element={<Protegido><Seguridad /></Protegido>} />
 
           <Route path="/" element={<Navigate to="/admin" replace />} />

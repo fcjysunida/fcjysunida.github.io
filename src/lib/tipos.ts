@@ -222,6 +222,7 @@ export interface Certificado {
   emitido_en: string
   anulado_en: string | null
   email: string
+  aviso_enviado_en: string | null
 }
 
 export interface CertificadoPublico {
