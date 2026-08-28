@@ -60,3 +60,7 @@ export const solicitarDerecho = (tipo: string, email: string, detalle: string) =
   rpc<{ ok: boolean; error?: string; vence_en?: string }>(
     'solicitar_derecho', { p_tipo: tipo, p_email: email, p_detalle: detalle },
   )
+
+/** Verificación pública de un certificado: /c/:codigo */
+export const certificadoPorCodigo = (codigo: string) =>
+  rpc<import('../lib/tipos').CertificadoPublico>('certificado_por_codigo', { p_codigo: codigo })

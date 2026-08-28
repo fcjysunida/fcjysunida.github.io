@@ -25,7 +25,16 @@ Docente de Tiempo Completo (DTC)*.
    siempre en agregado.
 5. **Panel de administración.** Actividades, inscripciones, asistencia, calidad percibida,
    estadísticas del informe DTC y gobierno de datos.
-6. **Protección de datos.** Cifrado de columna con clave en Vault, cédula enmascarada por
+6. **Padrón académico.** Nómina de estudiantes y egresados por período. Al recibir una
+   inscripción, el sistema cruza la cédula y fija la condición efectiva en vez de creerle
+   a lo declarado. El cruce se hace sobre el HMAC: no descifra ninguna cédula.
+7. **Constancias.** Plantillas con etiquetas `<<Etiqueta>>` —la misma lógica de Autocrat—,
+   emisión por lote según asistencia y verificación pública en `/c/:codigo`.
+8. **Proyectos de extensión.** Propuesta e informe con la estructura de los formatos
+   oficiales 9 y 10, incluida la escala de carga horaria del anexo. Se exportan en Word.
+9. **Correo.** Cola con tope diario, para que el plan gratuito del proveedor no rompa una
+   inscripción masiva. Confirmación, recordatorio de jornada y aviso de constancia.
+10. **Protección de datos.** Cifrado de columna con clave en Vault, cédula enmascarada por
    defecto, auditoría inalterable, retención automática a los 24 meses y ruta pública para
    ejercer derechos.
 
@@ -50,15 +59,27 @@ Es idempotente: si ya existen, no las toca. Rotarlas invalidaría todo lo cifrad
 
 ### 2. Primer usuario
 
-Necesita `SUPABASE_SERVICE_ROLE_KEY` en `.env`, que se obtiene en el panel de Supabase
-(*Project Settings → API*). **No se commitea.**
+Dos caminos. El más simple no necesita ninguna clave:
+
+**a) Registro desde el panel.** Entre a `/admin`, elija «No tengo cuenta todavía» y
+regístrese con su correo institucional y una contraseña propia. La cuenta nace **sin
+permisos**. Después, alguien con acceso a la base le asigna el rol:
+
+```sql
+insert into usuarios (id, nombre, email, rol)
+select id, 'Nombre Apellido', email, 'admin' from auth.users
+ where email = 'extensionderecho@unida.edu.py'
+on conflict (id) do update set rol = excluded.rol, activo = true;
+```
+
+**b) Alta desde la línea de comandos.** Necesita `SUPABASE_SERVICE_ROLE_KEY` en `.env`,
+que se copia en *Project Settings → API Keys → `service_role` → Reveal*. **No se commitea.**
 
 ```bash
-npm run cli -- usuarios:alta --email direccion@unida.edu.py \
+npm run cli -- usuarios:alta --email extensionderecho@unida.edu.py \
   --nombre "Patricia Sequeira" --rol admin
 ```
 
-Imprime una contraseña provisoria una sola vez. Entréguela por un canal seguro.
 Roles: `admin`, `coordinacion`, `docente`, `secretaria`, `auditor`.
 
 ### 3. Frontend
@@ -84,6 +105,7 @@ publica. Ver `docs/DESPLIEGUE.md`.
 | `/a/:token` | Asistencia del día y evaluación | Público, sin cuenta |
 | `/privacidad` | Política de tratamiento de datos | Público |
 | `/derechos` | Solicitud de acceso, rectificación, supresión y demás | Público |
+| `/c/:codigo` | Verificación pública de una constancia | Público |
 | `/admin` | Panel | Sesión con rol |
 
 ## Tipología de actividad
@@ -102,7 +124,7 @@ src/data/          Repositorios: publico.ts (anónimo) y panel.ts (con sesión)
 src/lib/           Tipos, formato, campos, sesión, cliente de Supabase, datos institucionales
 supabase/migrations/  Esquema, RLS, funciones, encuesta, indicadores, tareas programadas
 cli/               Operación desde la línea de comandos
-docs/              Arquitectura, seguridad, consentimiento, informe DTC, despliegue
+docs/              Arquitectura, seguridad, consentimiento, informe DTC, padrón, despliegue
 ```
 
 ## Operación desde Claude Code

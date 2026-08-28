@@ -127,7 +127,7 @@ export default function Inscripciones() {
               <thead>
                 <tr>
                   <th>Nombre</th><th>Cédula</th><th>Correo</th><th>Condición</th>
-                  <th>Institución</th><th>Modalidad</th><th>Cert.</th>
+                  <th>Matrícula</th><th>Institución</th><th>Cert.</th>
                   <th style={{ textAlign: 'right' }}>Asist.</th><th>Estado</th><th />
                 </tr>
               </thead>
@@ -143,9 +143,20 @@ export default function Inscripciones() {
                       )}
                     </td>
                     <td style={{ fontSize: 13 }}>{i.email}</td>
-                    <td style={{ fontSize: 13 }}>{CONDICIONES[i.condicion] ?? i.condicion}</td>
+                    <td style={{ fontSize: 13 }} title={i.condicion_origen ?? undefined}>
+                      {CONDICIONES[i.condicion] ?? i.condicion}
+                      {i.verificado_en_padron && (
+                        <span title="Verificado contra el padrón académico"
+                              style={{ color: 'var(--rojo-oscuro)', marginLeft: 4 }}>✓</span>
+                      )}
+                      {i.condicion_declarada && i.condicion_declarada !== i.condicion && (
+                        <span className="tenue" style={{ display: 'block', fontSize: 11 }}>
+                          declaró {CONDICIONES[i.condicion_declarada] ?? i.condicion_declarada}
+                        </span>
+                      )}
+                    </td>
+                    <td className="numeral" style={{ fontSize: 13 }}>{i.matricula ?? '—'}</td>
                     <td style={{ fontSize: 13 }}>{i.institucion ?? '—'}</td>
-                    <td style={{ fontSize: 13 }}>{i.modalidad ?? '—'}</td>
                     <td style={{ fontSize: 13 }}>{i.requiere_certificado ? 'Sí' : 'No'}</td>
                     <td className="numeral" style={{ textAlign: 'right' }}>{i.jornadas_asistidas}</td>
                     <td style={{ fontSize: 13 }}>
@@ -179,6 +190,8 @@ export default function Inscripciones() {
 
           <p style={{ fontSize: 13, color: 'var(--tenue)', marginTop: 16, maxWidth: '85ch' }}>
             {activas} inscripciones activas de {filas.length} registradas.{' '}
+            {filas.filter((i) => i.verificado_en_padron).length} verificadas contra el padrón
+            académico (marcadas con ✓); el resto conserva la condición declarada.{' '}
             {permisos.veCedula
               ? 'La cédula se muestra enmascarada; revelarla exige declarar un motivo y queda en auditoría.'
               : 'La cédula se muestra enmascarada conforme al principio de minimización; su rol no accede al valor completo.'}{' '}

@@ -6,6 +6,7 @@ import Formulario from './publico/Formulario'
 import CheckIn from './publico/CheckIn'
 import Privacidad from './publico/Privacidad'
 import Derechos from './publico/Derechos'
+import Certificado from './publico/Certificado'
 import NoEncontrado from './publico/NoEncontrado'
 
 import MarcoAdmin from './admin/Marco'
@@ -16,6 +17,11 @@ import Inscripciones from './admin/Inscripciones'
 import Asistencia from './admin/Asistencia'
 import Indicadores from './admin/Indicadores'
 import Calidad from './admin/Calidad'
+import Padron from './admin/Padron'
+import Certificados from './admin/Certificados'
+import Proyectos from './admin/Proyectos'
+import Proyecto from './admin/Proyecto'
+import Ajustes from './admin/Ajustes'
 import Seguridad from './admin/Seguridad'
 import { Cargando } from './ui/piezas'
 
@@ -39,6 +45,8 @@ export default function App() {
           <Route path="/a/:token" element={<CheckIn />} />
           <Route path="/privacidad" element={<Privacidad />} />
           <Route path="/derechos" element={<Derechos />} />
+          <Route path="/c/:codigo" element={<Certificado />} />
+          <Route path="/c" element={<Certificado />} />
 
           {/* Panel */}
           <Route path="/admin"              element={<Protegido><Panel /></Protegido>} />
@@ -47,6 +55,11 @@ export default function App() {
           <Route path="/admin/asistencia"   element={<Protegido><Asistencia /></Protegido>} />
           <Route path="/admin/indicadores"  element={<Protegido><Indicadores /></Protegido>} />
           <Route path="/admin/calidad"      element={<Protegido><Calidad /></Protegido>} />
+          <Route path="/admin/certificados" element={<Protegido><Certificados /></Protegido>} />
+          <Route path="/admin/padron"       element={<Protegido><Padron /></Protegido>} />
+          <Route path="/admin/proyectos"    element={<Protegido><Proyectos /></Protegido>} />
+          <Route path="/admin/proyectos/:id" element={<Protegido><Proyecto /></Protegido>} />
+          <Route path="/admin/ajustes"      element={<Protegido><Ajustes /></Protegido>} />
           <Route path="/admin/seguridad"    element={<Protegido><Seguridad /></Protegido>} />
 
           <Route path="/" element={<Navigate to="/admin" replace />} />

@@ -69,7 +69,16 @@ export async function comoOperador(): Promise<SupabaseClient> {
 /** Cliente con service_role. Solo para alta de usuarios y claves del Vault. */
 export function comoServicio(): SupabaseClient {
   if (!URL || !SERVICE) {
-    fatal('Falta SUPABASE_SERVICE_ROLE_KEY en .env. Se obtiene en el panel de Supabase y nunca se commitea.')
+    fatal(
+      'Falta SUPABASE_SERVICE_ROLE_KEY en .env.\n\n' +
+      '  Dónde se obtiene:\n' +
+      '    https://supabase.com/dashboard/project/mpsajgoycmmciobnnmjy/settings/api-keys\n' +
+      '    → pestaña «API Keys» → fila `service_role` → «Reveal» → copiar.\n\n' +
+      '  Después, en el archivo .env de este repositorio:\n' +
+      '    SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...\n\n' +
+      '  Esa clave se saltea la RLS: no se commitea, no se pega en el navegador\n' +
+      '  y no se comparte. .env ya está en .gitignore.',
+    )
   }
   return createClient(URL, SERVICE, { auth: { persistSession: false } })
 }

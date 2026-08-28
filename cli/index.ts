@@ -10,6 +10,8 @@ import { writeFileSync } from 'node:fs'
 import { argumentos, exigir, fatal, comoOperador, comoServicio, tabla } from './comun'
 import { informeMarkdown, informeDocx } from './informe'
 import type { DatosInforme } from './informe'
+import { leerPlanilla } from './planilla'
+import { propuestaDocx, informeDocx as proyectoInformeDocx } from './proyecto-docx'
 
 const [, , comando = '', ...resto] = process.argv
 const args = argumentos(resto)
@@ -34,6 +36,26 @@ const AYUDA = `
     inscripciones:listar --actividad <uuid>         # cédula enmascarada
     inscripciones:exportar --actividad <uuid> --motivo "certificación" [--con-cedula]
     inscripciones:editar --id <uuid> --campo estado --valor anulada
+
+  Padrón académico
+    periodo:crear --codigo 2025-1 --desde 2025-02-01 --hasta 2025-07-31
+    padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1
+                    [--condicion estudiante|egresado] [--dry-run]
+                    [--col-nombre N --col-cedula N --col-matricula N]   # si no los detecta
+    padron:resumen
+    padron:recruzar [--actividad <uuid>]            # reclasifica lo ya inscripto
+
+  Constancias
+    certificados:emitir --actividad <uuid> [--rol participante] [--minimo 1] [--dry-run]
+    certificados:listar --actividad <uuid>
+
+  Proyectos de extensión
+    proyecto:listar
+    proyecto:exportar --id <uuid> [--informe <uuid>] [--salida archivo.docx]
+
+  Correo
+    correo:habilitar --clave <service_role>         # guarda la clave en la bóveda
+    correo:estado
 
   Calidad
     calidad:ver --actividad <uuid>                  # CSAT, NPS y dimensiones
@@ -256,6 +278,183 @@ async function main(): Promise<void> {
       console.log(simulacion
         ? `\n  Simulación: ${r.alcanzadas} inscripciones alcanzadas por el plazo de ${r.meses} meses.\n`
         : `\n  Se anonimizaron ${r.anonimizadas} inscripciones y se eliminaron sus datos sensibles.\n`)
+      break
+    }
+
+    // ── Padrón académico ─────────────────────────────────────────────────────
+    case 'periodo:crear': {
+      const [codigo, desde, hasta] = exigir(args, 'codigo', 'desde', 'hasta')
+      const db = await comoOperador()
+      const { error } = await db.rpc('periodo_academico_guardar', {
+        p_codigo: codigo, p_desde: desde, p_hasta: hasta,
+      })
+      if (error) fatal(error.message)
+      console.log(`\n  Período ${codigo} guardado (${desde} a ${hasta}).\n`)
+      break
+    }
+
+    case 'padron:importar': {
+      const [archivo, periodo] = exigir(args, 'archivo', 'periodo')
+      const condicion = (args.condicion as string) ?? 'estudiante'
+      if (!['estudiante', 'egresado'].includes(condicion)) {
+        fatal('--condicion debe ser estudiante o egresado.')
+      }
+      const forzado: Record<string, number> = {}
+      for (const k of ['nombre', 'cedula', 'matricula', 'carrera', 'ciclo']) {
+        const v = args[`col-${k}`]
+        if (typeof v === 'string') forzado[k] = Number(v) - 1
+      }
+
+      console.log(`\n  Leyendo ${archivo}…`)
+      const { filas, encabezados, leidas } = await leerPlanilla(
+        archivo, forzado, (args.hoja as string) ?? undefined)
+
+      console.log(`  ${leidas} filas en la planilla, ${filas.length} con nombre y cédula.`)
+      console.log(`  Columnas detectadas: ${encabezados.slice(0, 12).join(' | ')}` +
+                  (encabezados.length > 12 ? ` … (+${encabezados.length - 12})` : ''))
+      const conMat = filas.filter((f) => f.matricula).length
+      const carreras = [...new Set(filas.map((f) => f.carrera).filter(Boolean))]
+      console.log(`  Con matrícula: ${conMat}. Carreras: ${carreras.join(', ') || '—'}`)
+      if (filas[0]) {
+        // Muestra enmascarada: la cédula completa no se imprime nunca.
+        console.log(`  Primera fila: ${filas[0].nombre} · cédula ` +
+                    `•••••${filas[0].cedula.slice(-2)} · matrícula ${filas[0].matricula ?? '—'}`)
+      }
+
+      if (args['dry-run'] === true) {
+        console.log('\n  Simulación: no se cargó nada. Quite --dry-run para importar.\n')
+        break
+      }
+      if (filas.length === 0) fatal('No hay filas para importar.')
+
+      const db = await comoOperador()
+      // En lotes: una planilla de varios miles de filas no entra en una sola llamada.
+      const LOTE = 400
+      let procesadas = 0, omitidas = 0, total = 0
+      for (let i = 0; i < filas.length; i += LOTE) {
+        const { data, error } = await db.rpc('padron_importar', {
+          p_periodo: periodo, p_condicion: condicion, p_filas: filas.slice(i, i + LOTE),
+        })
+        if (error) fatal(error.message)
+        const r = data as Record<string, number>
+        procesadas += Number(r.procesadas ?? 0)
+        omitidas += Number(r.omitidas ?? 0)
+        total = Number(r.total_periodo ?? 0)
+        process.stdout.write(`\r  Cargando… ${procesadas}/${filas.length}`)
+      }
+      console.log(`\n\n  ${procesadas} registros cargados en ${periodo} como ${condicion}.`)
+      if (omitidas > 0) console.log(`  ${omitidas} omitidos por falta de cédula o nombre.`)
+      console.log(`  El período tiene ahora ${total} registros.`)
+
+      const { data: cruce } = await db.rpc('recruzar_padron', { p_actividad: null })
+      const c = cruce as Record<string, number>
+      console.log(`  Recruce: ${c?.revisadas ?? 0} inscripciones revisadas, ` +
+                  `${c?.reclasificadas ?? 0} reclasificadas.\n`)
+      break
+    }
+
+    case 'padron:resumen': {
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('padron_resumen')
+      if (error) fatal(error.message)
+      tabla((data ?? []) as Record<string, unknown>[])
+      break
+    }
+
+    case 'padron:recruzar': {
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('recruzar_padron', {
+        p_actividad: (args.actividad as string) ?? null,
+      })
+      if (error) fatal(error.message)
+      const r = data as Record<string, number>
+      console.log(`\n  ${r.revisadas} inscripciones revisadas, ${r.reclasificadas} reclasificadas.\n`)
+      break
+    }
+
+    // ── Constancias ──────────────────────────────────────────────────────────
+    case 'certificados:emitir': {
+      const [actividad] = exigir(args, 'actividad')
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('emitir_certificados', {
+        p_actividad: actividad,
+        p_rol: (args.rol as string) ?? 'participante',
+        p_minimo_jornadas: Number(args.minimo ?? 1),
+        p_plantilla: (args.plantilla as string) ?? null,
+        p_solo_simulacion: args['dry-run'] === true,
+      })
+      if (error) fatal(error.message)
+      const r = data as Record<string, unknown>
+      if (r.sin_plantilla) fatal('No hay plantilla vigente para ese rol.')
+      console.log(r.simulacion
+        ? `\n  Se emitirían ${r.a_emitir} constancias. ${r.ya_tenian} ya la tienen.\n`
+        : `\n  ${r.a_emitir} constancias emitidas. El aviso a cada persona quedó encolado.\n`)
+      break
+    }
+
+    case 'certificados:listar': {
+      const [actividad] = exigir(args, 'actividad')
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('certificados_de', { p_actividad: actividad })
+      if (error) fatal(error.message)
+      tabla((data ?? []) as Record<string, unknown>[])
+      break
+    }
+
+    // ── Proyectos de extensión ───────────────────────────────────────────────
+    case 'proyecto:listar': {
+      const db = await comoOperador()
+      const { data, error } = await db.from('proyectos_resumen')
+        .select('id, nombre, clasificacion, estado, periodo_academico, horas_extension, informes')
+        .order('fecha_inicio', { ascending: false })
+      if (error) fatal(error.message)
+      tabla((data ?? []) as Record<string, unknown>[])
+      break
+    }
+
+    case 'proyecto:exportar': {
+      const [id] = exigir(args, 'id')
+      const db = await comoOperador()
+      const { data: p, error } = await db.from('proyectos').select('*').eq('id', id).single()
+      if (error) fatal(error.message)
+      const { data: parts } = await db.from('proyecto_participantes')
+        .select('tipo, nombre, matricula, carrera, ciclo, catedra, organizacion')
+        .eq('proyecto_id', id).order('orden')
+      const participantes = (parts ?? []) as Parameters<typeof propuestaDocx>[1]
+
+      if (typeof args.informe === 'string') {
+        const { data: inf, error: e2 } = await db.from('proyecto_informes')
+          .select('*').eq('id', args.informe).single()
+        if (e2) fatal(e2.message)
+        const ruta = (args.salida as string) ?? `informe-proyecto-${id.slice(0, 8)}.docx`
+        await proyectoInformeDocx(p, inf, participantes, ruta)
+        console.log(`\n  ${ruta}\n`)
+      } else {
+        const ruta = (args.salida as string) ?? `propuesta-proyecto-${id.slice(0, 8)}.docx`
+        await propuestaDocx(p, participantes, ruta)
+        console.log(`\n  ${ruta}\n`)
+      }
+      break
+    }
+
+    // ── Correo ───────────────────────────────────────────────────────────────
+    case 'correo:habilitar': {
+      const [clave] = exigir(args, 'clave')
+      const db = comoServicio()
+      const { data, error } = await db.rpc('clave_servicio_guardar', { p_clave: clave })
+      if (error) fatal(error.message)
+      console.log(`\n  ${String(data)}`)
+      console.log('  Falta cargar la clave del proveedor de correo:')
+      console.log('    supabase secrets set RESEND_API_KEY=…')
+      console.log('  y activar el envío en el panel, en Ajustes.\n')
+      break
+    }
+
+    case 'correo:estado': {
+      const db = await comoOperador()
+      const { data, error } = await db.rpc('correos_estado')
+      if (error) fatal(error.message)
+      tabla([data as Record<string, unknown>])
       break
     }
 

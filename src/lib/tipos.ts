@@ -73,6 +73,12 @@ export interface Inscripcion {
   cedula_mascara: string | null
   email: string
   condicion: Condicion
+  condicion_declarada: Condicion | null
+  condicion_origen: string | null
+  matricula: string | null
+  ciclo: string | null
+  padron_periodo: string | null
+  verificado_en_padron: boolean
   institucion: string | null
   carrera: string | null
   ciudad: string | null
@@ -163,4 +169,217 @@ export interface RegistroAuditoria {
   detalle: Record<string, unknown> | null
   ocurrio_en: string
   usuarios?: { nombre: string; email: string } | null
+}
+
+// ── Padrón académico ─────────────────────────────────────────────────────────
+export type CondicionAcademica = 'estudiante' | 'egresado'
+
+export interface PeriodoAcademico {
+  codigo: string
+  anio: number
+  semestre: number
+  desde: string
+  hasta: string
+}
+
+export interface ResumenPadron {
+  periodo: string
+  desde: string
+  hasta: string
+  estudiantes: number
+  egresados: number
+}
+
+export interface FilaPadron {
+  nombre: string
+  cedula: string
+  matricula?: string
+  carrera?: string
+  ciclo?: string
+}
+
+// ── Certificados ─────────────────────────────────────────────────────────────
+export type RolCertificado =
+  | 'participante' | 'disertante' | 'organizador' | 'tutor' | 'panelista' | 'moderador'
+
+export interface PlantillaCertificado {
+  id: string
+  nombre: string
+  rol: RolCertificado | null
+  cuerpo_html: string
+  fondo_url: string | null
+  orientacion: 'horizontal' | 'vertical'
+  vigente: boolean
+}
+
+export interface Certificado {
+  id: string
+  codigo: string
+  nombre: string
+  rol: RolCertificado
+  horas: number
+  jornadas: number
+  emitido_en: string
+  anulado_en: string | null
+  email: string
+}
+
+export interface CertificadoPublico {
+  error?: string
+  codigo: string
+  nombre: string
+  evento: string
+  fecha: string
+  horas: number
+  jornadas: number
+  rol: RolCertificado
+  emitido_en: string
+  valido: boolean
+  anulado_en: string | null
+  modalidad: string
+  lugar: string | null
+  plantilla: {
+    cuerpo_html: string
+    fondo_url: string | null
+    orientacion: 'horizontal' | 'vertical'
+  } | null
+}
+
+// ── Proyectos de extensión ───────────────────────────────────────────────────
+export type EstadoProyecto =
+  | 'borrador' | 'presentado' | 'aprobado' | 'en_ejecucion' | 'finalizado' | 'rechazado'
+
+export type ClasificacionProyecto =
+  | 'cursos_extracurriculares' | 'prestaciones_servicio' | 'actos_culturales'
+  | 'deportes' | 'publicaciones' | 'eventos_academicos'
+  | 'experiencia_conocimiento' | 'otros'
+
+export type TipoParticipante = 'docente' | 'funcionario' | 'externo' | 'estudiante'
+
+export interface Resultado { resultado: string; indicadores: string; verificacion: string }
+export interface ActividadPlan { actividad: string; inicio: string; fin: string; responsable: string }
+
+export interface Propuesta {
+  introduccion?: string
+  justificacion?: string
+  alcance?: {
+    antecedentes?: string
+    situacion_actual?: string
+    situacion_deseada?: string
+    poblacion_directa?: string
+    poblacion_indirecta?: string
+  }
+  resultados?: Resultado[]
+  objetivo_general?: string
+  objetivos_especificos?: string[]
+  metas?: string[]
+  metodologia?: string
+  actividades?: ActividadPlan[]
+  presupuesto?: Record<string, Record<string, string>>
+  creditos?: Record<string, Record<string, boolean>>
+  anexos?: string[]
+}
+
+export interface Proyecto {
+  id: string
+  nombre: string
+  clasificacion: ClasificacionProyecto
+  clasificacion_otros: string | null
+  estado: EstadoProyecto
+  periodo_academico: string | null
+  facultad: string
+  carreras: string | null
+  curso: string | null
+  localizacion: string | null
+  otras_organizaciones: string | null
+  lider: string | null
+  tutor: string | null
+  entregable: string | null
+  proyectos_relacionados: string | null
+  fecha_inicio: string | null
+  fecha_fin: string | null
+  horas_reloj: number
+  horas_extension: number
+  beneficiarios_directos: number
+  beneficiarios_indirectos: number
+  actividad_id: string | null
+  propuesta: Propuesta
+  docente_responsable: string | null
+  creado_en: string
+}
+
+export interface ProyectoResumen {
+  id: string
+  nombre: string
+  clasificacion: ClasificacionProyecto
+  estado: EstadoProyecto
+  periodo_academico: string | null
+  carreras: string | null
+  lider: string | null
+  fecha_inicio: string | null
+  fecha_fin: string | null
+  horas_reloj: number
+  horas_extension: number
+  beneficiarios_directos: number
+  beneficiarios_indirectos: number
+  actividad_id: string | null
+  estudiantes: number
+  docentes: number
+  informes: number
+  ultimo_informe: string | null
+}
+
+export interface ParticipanteProyecto {
+  id: string
+  proyecto_id: string
+  tipo: TipoParticipante
+  nombre: string
+  cedula_mascara: string | null
+  matricula: string | null
+  carrera: string | null
+  ciclo: string | null
+  catedra: string | null
+  organizacion: string | null
+  orden: number
+}
+
+export interface InformeProyecto {
+  id: string
+  proyecto_id: string
+  elaborado_por: string
+  aprobado_por: string | null
+  fecha_informe: string
+  lugar_ejecucion: string | null
+  beneficiarios: string | null
+  resumen: string | null
+  metodologia: string | null
+  conclusiones: string | null
+  informe: {
+    analisis?: { fila: string; planteado: string; alcanzado: string }[]
+    plan?: { actividad: string; responsables: string; cronograma: string }[]
+    metas?: { meta: string; indicadores: string; recursos: string }[]
+    rendicion?: Record<string, Record<string, string>>
+    anexos?: string[]
+  }
+  estado: EstadoProyecto
+  creado_en: string
+}
+
+export interface EscalaExtension {
+  clasificacion: ClasificacionProyecto
+  etiqueta: string
+  ejemplos: string
+  regla: string
+  max_total: number | null
+  max_actividad: number | null
+  factor_hora: number | null
+}
+
+// ── Correo ───────────────────────────────────────────────────────────────────
+export interface EstadoCorreo {
+  pendientes: number
+  enviados_24h: number
+  enviados_30d: number
+  fallidos: number
+  proximo: string | null
 }

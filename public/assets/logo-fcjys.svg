@@ -1,8 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 72" role="img"
-     aria-label="Facultad de Ciencias Jurídicas y Sociales — Universidad de la Integración de las Américas">
-  <rect x="0" y="6" width="6" height="60" fill="#ec3013"/>
-  <text x="22" y="30" font-family="Spectral, Georgia, serif" font-size="25" font-weight="600"
-        letter-spacing="-0.3" fill="#201e1d">Facultad de Ciencias Jurídicas y Sociales</text>
-  <text x="22" y="52" font-family="Archivo, system-ui, sans-serif" font-size="12.5"
-        letter-spacing="1.6" fill="#ae1800">UNIVERSIDAD DE LA INTEGRACIÓN DE LAS AMÉRICAS</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 96" role="img"
+     aria-label="UNIDA — Facultad de Ciencias Jurídicas y Sociales">
+  <!-- Reconstrucción del isologotipo institucional. Para fidelidad exacta,
+       reemplazar por el archivo oficial (ver README, sección «Identidad»). -->
+  <g fill="#c8202e">
+    <text x="0" y="70" font-family="Archivo, Helvetica, Arial, sans-serif"
+          font-size="62" font-weight="800" letter-spacing="-1.5">UNIDA</text>
+    <rect x="228" y="18" width="5" height="60"/>
+    <text x="250" y="38" font-family="Spectral, Georgia, serif"
+          font-size="21" font-weight="400" letter-spacing="0.4">FACULTAD DE</text>
+    <text x="250" y="61" font-family="Spectral, Georgia, serif"
+          font-size="21" font-weight="600" letter-spacing="0.2">CIENCIAS JURÍDICAS</text>
+    <text x="250" y="84" font-family="Spectral, Georgia, serif"
+          font-size="21" font-weight="600" letter-spacing="0.2">Y SOCIALES</text>
+  </g>
 </svg>

@@ -77,6 +77,17 @@ sensibles, que es exactamente lo que la ley quiere evitar.
 `accesibilidad`, `origen_difusion`). Sin `mapa`, la respuesta va a `respuestas` y no alimenta
 ningún indicador. Los campos con `mapa: "nombre"` y `mapa: "cedula"` son imprescindibles.
 
+## Módulos
+
+| Módulo | Dónde | Qué hace |
+| --- | --- | --- |
+| Inscripción y asistencia | `/f/:token`, `/a/:token` | Formulario, check-in por jornada |
+| Evaluación de satisfacción | dentro de `/a/:token` | ISO 10004: seis dimensiones, CSAT, NPS |
+| Padrón académico | `/admin/padron` | Nómina por período; fija la condición verificada |
+| Constancias | `/admin/certificados`, `/c/:codigo` | Emisión por lote y verificación pública |
+| Proyectos de extensión | `/admin/proyectos` | Formatos oficiales 9 y 10, exportación en Word |
+| Correo | `/admin/ajustes` | Cola con tope diario; Resend |
+
 ## Tareas frecuentes
 
 ### Crear una actividad y su formulario
@@ -119,6 +130,30 @@ npm run cli -- informe:dtc --mes 2026-08 --docente "Nombre Apellido" --formato d
 ```
 Genera el documento con los bloques 1 a 8 del formulario oficial. Los bloques 1, 7 y 8 quedan
 preparados para completar a mano; el resto se calcula.
+
+### Padrón académico
+```
+npm run cli -- periodo:crear --codigo 2025-1 --desde 2025-01-01 --hasta 2025-07-31
+npm run cli -- padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1 --dry-run
+npm run cli -- padron:importar --archivo "alumnos de derecho.XLS" --periodo 2025-1
+```
+Lee `.XLS` (BIFF2, el que exporta el sistema académico), `.xlsx` y `.csv`. Reimportar el
+mismo período actualiza en vez de duplicar: la clave es (período, cédula). No se importan
+correos ni teléfonos: no hacen falta para clasificar. Ver `docs/PADRON.md`.
+
+### Constancias
+```
+npm run cli -- certificados:emitir --actividad <uuid> --minimo 1 --dry-run
+npm run cli -- certificados:emitir --actividad <uuid>
+```
+Las plantillas usan etiquetas `<<Etiqueta>>`, la misma sintaxis de Autocrat. Cada constancia
+lleva un código verificable en `/c/:codigo` y congela nombre, fecha y horas.
+
+### Proyectos de extensión
+```
+npm run cli -- proyecto:exportar --id <uuid>                        # formato 9
+npm run cli -- proyecto:exportar --id <uuid> --informe <uuid>       # formato 10
+```
 
 ### Retención
 ```

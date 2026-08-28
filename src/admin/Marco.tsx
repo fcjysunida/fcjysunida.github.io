@@ -11,7 +11,11 @@ const PESTANAS = [
   { a: '/admin/asistencia',      label: 'Asistencia' },
   { a: '/admin/indicadores',     label: 'Estadísticas' },
   { a: '/admin/calidad',         label: 'Calidad' },
+  { a: '/admin/certificados',    label: 'Constancias' },
+  { a: '/admin/proyectos',       label: 'Proyectos' },
+  { a: '/admin/padron',          label: 'Padrón' },
   { a: '/admin/seguridad',       label: 'Protección de datos' },
+  { a: '/admin/ajustes',         label: 'Ajustes' },
 ]
 
 export default function MarcoAdmin({ children }: { children: ReactNode }) {
