@@ -858,7 +858,7 @@ interface Campo {
   obligatorio?: boolean; cifrado?: boolean; sensible?: boolean; mapa?: string
 }
 
-const base = () => process.env.FCJYS_BASE ?? 'https://fcjysunida.github.io'
+const base = () => process.env.FCJYS_BASE ?? 'https://fcjysunida.fojas.app'
 
 function mostrarEnlaces(e: Enlaces): void {
   console.log(`\n  ${e.titulo}\n`)

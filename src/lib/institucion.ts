@@ -4,7 +4,11 @@ export const FACULTAD =
 export const FACULTAD_CORTA = 'Facultad de Ciencias Jurídicas y Sociales — UNIDA'
 export const RESPONSABLE = 'Abg. Patricia Sequeira'
 export const CORREO = 'extensionderecho@unida.edu.py'
-export const DOMINIO_PUBLICO = 'fcjysunida.github.io'
+export const DOMINIO_PUBLICO =
+  import.meta.env.VITE_DOMINIO_PUBLICO ?? 'fcjysunida.fojas.app'
+/** Dominio anterior. Sigue vivo redirigiendo: hay constancias impresas que lo
+ *  llevan y no se pueden reimprimir. No lo borres sin revisar `index.html`. */
+export const DOMINIO_ANTERIOR = 'fcjysunida.github.io'
 export const RETENCION_MESES = 24
 export const AUTORIDAD = 'Agencia Nacional de Protección de Datos Personales'
 export const LEY = 'Ley N° 7593/2025'

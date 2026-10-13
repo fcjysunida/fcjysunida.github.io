@@ -1,0 +1,15 @@
+{
+  // Despliegue en Cloudflare Workers con recursos estáticos. El build de Vite
+  // deja todo en dist/ y este Worker no tiene código propio: sólo sirve.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fcjysunida",
+  "compatibility_date": "2026-10-13",
+  "assets": {
+    "directory": "./dist",
+    // La aplicación resuelve sus rutas en el cliente. Cualquier ruta que no sea
+    // un archivo devuelve index.html con estado 200 —no 404—, que es lo que hace
+    // que /f/:token y /c/:codigo abran al pegarlos y que WhatsApp y los clientes
+    // de correo armen la vista previa del enlace.
+    "not_found_handling": "single-page-application"
+  }
+}
