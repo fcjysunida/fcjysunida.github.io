@@ -17,7 +17,7 @@ Este archivo es el contrato de trabajo para agentes. Leelo antes de tocar el rep
    se cierra la anterior con `vigente_hasta`. Las inscripciones ya registradas conservan la
    versión que su titular aceptó — es la prueba del consentimiento del artículo 6.°.
 6. `SUPABASE_SERVICE_ROLE_KEY` no se commitea ni se usa desde el frontend. Solo lo usan
-   `claves:inicializar` y `usuarios:alta`.
+   `claves:inicializar`, `usuarios:alta` y `correo:preparar`.
 7. Las claves de cifrado viven en Supabase Vault. Se generan dentro de la base con
    `claves_inicializar()`. **Nunca** las leas ni las muestres: rotarlas invalida todo lo cifrado.
 8. Cambios de esquema: migración nueva en `supabase/migrations`, jamás edición destructiva

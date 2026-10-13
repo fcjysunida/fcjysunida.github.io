@@ -787,7 +787,12 @@ async function main(): Promise<void> {
     }
 
     case 'correo:estado': {
-      const db = await comoOperador()
+      // Diagnóstico de sólo lectura y sin secretos: si hay clave de servicio en
+      // el entorno la usa, para no pedir usuario y contraseña por una tabla que
+      // sólo dice qué falta.
+      const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? comoServicio()
+        : await comoOperador()
       const { data, error } = await db.rpc('correos_estado')
       if (error) fatal(error.message)
       tabla([data as Record<string, unknown>])
@@ -826,7 +831,12 @@ async function main(): Promise<void> {
     }
 
     case 'correo:estado': {
-      const db = await comoOperador()
+      // Diagnóstico de sólo lectura y sin secretos: si hay clave de servicio en
+      // el entorno la usa, para no pedir usuario y contraseña por una tabla que
+      // sólo dice qué falta.
+      const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? comoServicio()
+        : await comoOperador()
       const { data, error } = await db.rpc('correo_estado')
       if (error) fatal(error.message)
       const filas = (data ?? []) as { requisito: string; listo: boolean; detalle: string }[]
