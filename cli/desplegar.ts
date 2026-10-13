@@ -181,11 +181,10 @@ export async function desplegar(o: Opciones): Promise<void> {
     ? '  Despliegue disparado ✓'
     : '  El despliegue arrancará solo con el push.')
 
-  // Un repositorio llamado «<dueño>.github.io» se sirve en la raíz del dominio;
-  // cualquier otro cuelga de /<nombre>/.
-  const sitio = nombre.toLowerCase() === `${duenio.toLowerCase()}.github.io`
-    ? `https://${duenio.toLowerCase()}.github.io`
-    : `https://${duenio.toLowerCase()}.github.io/${nombre}`
+  // El sitio público vive en Cloudflare Pages sobre el dominio propio. GitHub
+  // Pages sigue publicando el mismo build, pero sólo para redirigir los enlaces
+  // ya repartidos: no es la dirección que hay que mostrar.
+  const sitio = process.env.FCJYS_BASE ?? 'https://fcjysunida.fojas.app'
   console.log(`\n  Sitio:      ${sitio}`)
   console.log(`  Formulario: ${sitio}/f/<token>`)
   console.log(`  Asistencia: ${sitio}/a/<token>`)

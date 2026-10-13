@@ -87,7 +87,12 @@ const AYUDA = `
 
   Puesta en marcha (usan SUPABASE_SERVICE_ROLE_KEY)
     claves:inicializar
+    correo:preparar                 # guarda la clave de servicio en la bóveda, que es
+                                    # lo que le falta a la tarea para poder enviar
     usuarios:alta --email ... --nombre "..." --rol admin|coordinacion|docente|secretaria|auditor
+
+  Correo
+    correo:estado                   # qué falta para que salga un mensaje
 `
 
 async function main(): Promise<void> {
@@ -782,7 +787,12 @@ async function main(): Promise<void> {
     }
 
     case 'correo:estado': {
-      const db = await comoOperador()
+      // Diagnóstico de sólo lectura y sin secretos: si hay clave de servicio en
+      // el entorno la usa, para no pedir usuario y contraseña por una tabla que
+      // sólo dice qué falta.
+      const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? comoServicio()
+        : await comoOperador()
       const { data, error } = await db.rpc('correos_estado')
       if (error) fatal(error.message)
       tabla([data as Record<string, unknown>])
@@ -817,6 +827,40 @@ async function main(): Promise<void> {
               '    supabase db push')
       }
       console.log(`\n  ${String(data)}\n`)
+      break
+    }
+
+    case 'correo:estado': {
+      // Diagnóstico de sólo lectura y sin secretos: si hay clave de servicio en
+      // el entorno la usa, para no pedir usuario y contraseña por una tabla que
+      // sólo dice qué falta.
+      const db = process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? comoServicio()
+        : await comoOperador()
+      const { data, error } = await db.rpc('correo_estado')
+      if (error) fatal(error.message)
+      const filas = (data ?? []) as { requisito: string; listo: boolean; detalle: string }[]
+      console.log()
+      tabla(filas.map((f) => ({
+        '': f.listo ? '✓' : '✗', requisito: f.requisito, detalle: f.detalle,
+      })))
+      const faltan = filas.filter((f) => !f.listo)
+      console.log(faltan.length === 0
+        ? '\n  Todo listo. El primer correo sale en la próxima corrida.\n'
+        : `\n  Faltan ${faltan.length}: ${faltan.map((f) => f.requisito).join(', ')}.\n`)
+      break
+    }
+
+    case 'correo:preparar': {
+      // La clave de servicio va de la variable de entorno a la bóveda sin pasar
+      // por la pantalla ni por el historial de ninguna consola SQL.
+      const clave = process.env.SUPABASE_SERVICE_ROLE_KEY
+      if (!clave) fatal('Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.')
+      const db = comoServicio()
+      const { data, error } = await db.rpc('correo_preparar', { p_service_role: clave })
+      if (error) fatal(error.message)
+      console.log(`\n  ${String(data)}`)
+      console.log('  Revise lo que falta con:  npm run cli -- correo:estado\n')
       break
     }
 
@@ -858,7 +902,7 @@ interface Campo {
   obligatorio?: boolean; cifrado?: boolean; sensible?: boolean; mapa?: string
 }
 
-const base = () => process.env.FCJYS_BASE ?? 'https://fcjysunida.github.io'
+const base = () => process.env.FCJYS_BASE ?? 'https://fcjysunida.fojas.app'
 
 function mostrarEnlaces(e: Enlaces): void {
   console.log(`\n  ${e.titulo}\n`)

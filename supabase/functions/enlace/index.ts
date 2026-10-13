@@ -8,7 +8,7 @@
 // concreta —título, fechas, lugar, portada— y manda a la persona al formulario.
 // El rastreador se queda con el HTML; quien hace clic sigue de largo.
 
-const SITIO = Deno.env.get('SITIO_PUBLICO') ?? 'https://fcjysunida.github.io'
+const SITIO = Deno.env.get('SITIO_PUBLICO') ?? 'https://fcjysunida.fojas.app'
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!
 
