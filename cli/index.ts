@@ -68,8 +68,8 @@ const AYUDA = `
     proyecto:exportar --id <uuid> [--informe <uuid>] [--salida archivo.docx]
 
   Correo
-    correo:habilitar --clave <service_role>         # guarda la clave en la bóveda
-    correo:estado
+    correo:estado                                   # cola: pendientes, enviados, fallidos
+    correo:requisitos                               # qué falta para que salga un mensaje
 
   Calidad
     calidad:ver --actividad <uuid>                  # CSAT, NPS y dimensiones
@@ -87,12 +87,11 @@ const AYUDA = `
 
   Puesta en marcha (usan SUPABASE_SERVICE_ROLE_KEY)
     claves:inicializar
-    correo:preparar                 # guarda la clave de servicio en la bóveda, que es
-                                    # lo que le falta a la tarea para poder enviar
+    correo:preparar                 # guarda la clave de servicio en la bóveda tomándola
+                                    # del entorno. correo:habilitar --clave hace lo
+                                    # mismo, pero deja la clave en el historial del shell
     usuarios:alta --email ... --nombre "..." --rol admin|coordinacion|docente|secretaria|auditor
 
-  Correo
-    correo:estado                   # qué falta para que salga un mensaje
 `
 
 async function main(): Promise<void> {
@@ -774,15 +773,25 @@ async function main(): Promise<void> {
     }
 
     // ── Correo ───────────────────────────────────────────────────────────────
-    case 'correo:habilitar': {
-      const [clave] = exigir(args, 'clave')
+    // `correo:preparar` toma la clave del entorno; `correo:habilitar --clave` la
+    // recibe por argumento y queda en el historial del shell. Misma operación,
+    // un solo camino: se prefiere el entorno cuando está.
+    case 'correo:habilitar':
+    case 'correo:preparar': {
+      const clave = process.env.SUPABASE_SERVICE_ROLE_KEY ?? (args.clave as string | undefined)
+      if (!clave) {
+        fatal('Falta la clave de servicio. Poné SUPABASE_SERVICE_ROLE_KEY en .env\n' +
+              '    (preferible: no queda en el historial del shell), o pasá --clave.')
+      }
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.log('\n  Aviso: la pasaste por --clave, así que quedó en el historial\n' +
+                    '  del shell. Conviene ponerla en .env y volver a correrlo.')
+      }
       const db = comoServicio()
       const { data, error } = await db.rpc('clave_servicio_guardar', { p_clave: clave })
       if (error) fatal(error.message)
       console.log(`\n  ${String(data)}`)
-      console.log('  Falta cargar la clave del proveedor de correo:')
-      console.log('    supabase secrets set RESEND_API_KEY=…')
-      console.log('  y activar el envío en el panel, en Ajustes.\n')
+      console.log('  Revise lo que falta con:  npm run cli -- correo:requisitos\n')
       break
     }
 
@@ -830,10 +839,10 @@ async function main(): Promise<void> {
       break
     }
 
-    case 'correo:estado': {
-      // Diagnóstico de sólo lectura y sin secretos: si hay clave de servicio en
-      // el entorno la usa, para no pedir usuario y contraseña por una tabla que
-      // sólo dice qué falta.
+    case 'correo:requisitos': {
+      // Qué falta para que salga un mensaje. Distinto de `correo:estado`, que
+      // mira la cola. Sólo lectura y sin secretos: si hay clave de servicio en
+      // el entorno la usa, para no pedir usuario y contraseña por esta tabla.
       const db = process.env.SUPABASE_SERVICE_ROLE_KEY
         ? comoServicio()
         : await comoOperador()
@@ -851,18 +860,6 @@ async function main(): Promise<void> {
       break
     }
 
-    case 'correo:preparar': {
-      // La clave de servicio va de la variable de entorno a la bóveda sin pasar
-      // por la pantalla ni por el historial de ninguna consola SQL.
-      const clave = process.env.SUPABASE_SERVICE_ROLE_KEY
-      if (!clave) fatal('Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.')
-      const db = comoServicio()
-      const { data, error } = await db.rpc('correo_preparar', { p_service_role: clave })
-      if (error) fatal(error.message)
-      console.log(`\n  ${String(data)}`)
-      console.log('  Revise lo que falta con:  npm run cli -- correo:estado\n')
-      break
-    }
 
     case 'usuarios:alta': {
       const [email, nombre, rol] = exigir(args, 'email', 'nombre', 'rol')

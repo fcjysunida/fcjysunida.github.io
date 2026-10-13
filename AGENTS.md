@@ -236,14 +236,22 @@ cada quince minutos— pero **no envía nada hasta que se la pone en marcha**. S
 cuatro requisitos, y los tres primeros fallan en silencio:
 
 ```
-npm run cli -- correo:estado      # dice cuáles faltan
+npm run cli -- correo:requisitos  # dice cuáles de los cuatro faltan
 npm run cli -- correo:preparar    # guarda la clave de servicio en la bóveda
+npm run cli -- correo:estado      # la cola: pendientes, enviados, fallidos
 ```
+
+`correo:requisitos` y `correo:estado` responden preguntas distintas y conviene no
+confundirlas: el primero dice si el correo *puede* salir, el segundo qué pasó con
+lo que ya se encoló. `correo:preparar` y `correo:habilitar` son el mismo comando;
+el primero toma la clave del entorno y el segundo de `--clave`, donde queda
+escrita en el historial del shell.
 
 1. **`fcjys_service_role` en la bóveda.** Sin él `app.drenar_correo()` vuelve sin
    llamar a la función y no deja rastro: la tarea figura como «succeeded» igual.
-   Lo guarda `correo:preparar`, que toma la clave del entorno. No lo hagas desde el
-   editor SQL del panel: el argumento queda en el historial de consultas.
+   Lo guarda `correo:preparar`, que toma la clave del entorno y llama a
+   `clave_servicio_guardar()`. No lo hagas desde el editor SQL del panel: el
+   argumento queda en el historial de consultas.
 2. **`RESEND_API_KEY`** en los secretos de la función `enviar-correos`.
 3. **Dominio verificado en Resend.** El remitente vive en `configuracion.correo_remitente`
    y su dominio tiene que estar verificado, o Resend rechaza cada mensaje. El plan

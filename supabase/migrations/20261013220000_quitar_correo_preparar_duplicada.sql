@@ -1,0 +1,12 @@
+-- `correo_preparar()` hacía exactamente lo mismo que `clave_servicio_guardar()`,
+-- que existía desde la migración `clave_servicio_en_vault` de agosto: guardar la
+-- clave de servicio en la bóveda. La escribí sin mirar si ya estaba.
+--
+-- Se queda la original. Lo que sí se conserva es la mejora del CLI: la clave se
+-- toma de SUPABASE_SERVICE_ROLE_KEY en el entorno en vez de pasarla por --clave,
+-- donde queda escrita en el historial del shell.
+--
+-- `correo_estado()` no se toca: responde otra pregunta que `correos_estado()`.
+-- Aquélla mira la cola —pendientes, enviados, fallidos—; ésta dice qué falta
+-- configurar para que salga el primer mensaje.
+drop function if exists public.correo_preparar(text);
