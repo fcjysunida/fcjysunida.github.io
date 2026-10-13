@@ -43,6 +43,35 @@
       })()
     </script>
     <div id="raiz"></div>
+    <!-- Red de contención. Si el paquete falla al evaluarse —una variable de
+         compilación que faltó, un recurso que no cargó— React nunca monta y el
+         visitante ve una pantalla blanca sin una sola pista. Esto escribe un
+         mensaje legible y deja el detalle técnico a la vista de quien diagnostica. -->
+    <script>
+      (function () {
+        var fallo = null
+        window.addEventListener('error', function (e) { fallo = fallo || (e.message || e.error) })
+        window.addEventListener('unhandledrejection', function (e) { fallo = fallo || e.reason })
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var r = document.getElementById('raiz')
+            if (!r || r.innerHTML.trim() !== '' || !fallo) return
+            r.innerHTML =
+              '<div style="max-width:34rem;margin:14vh auto;padding:0 1.5rem;' +
+              'font-family:system-ui,sans-serif;line-height:1.6;color:#19120f">' +
+              '<p style="font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;' +
+              'color:#ad331b;font-weight:600;margin:0 0 .75rem">No pudimos abrir el sitio</p>' +
+              '<h1 style="font-size:1.6rem;margin:0 0 .75rem;font-weight:600">' +
+              'El sitio está mal configurado.</h1>' +
+              '<p style="margin:0 0 1.25rem">No es un problema suyo ni de su conexión. ' +
+              'Avise a la Coordinación de Extensión y vuelva a intentarlo más tarde.</p>' +
+              '<p style="font-size:.8rem;color:#6b5f59;margin:0;word-break:break-word">' +
+              'Detalle para quien administra el sitio: ' +
+              String(fallo && fallo.message ? fallo.message : fallo) + '</p></div>'
+          }, 400)
+        })
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
